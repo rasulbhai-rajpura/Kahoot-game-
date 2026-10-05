@@ -252,24 +252,56 @@ function initHost() {
 function broadcastPin() {
     // નમૂનાની તૈયાર Excel (.xlsx) ફાઈલ ડાઉનલોડ કરવાનું ફંક્શન
 function downloadSampleExcel() {
-    // નમૂનાના ડેટાનું માળખું
-    const sampleData = [
-        {
-            "Question": "પૃથ્વીના ગોળા પર સૌથી મોટું અક્ષાંશવૃત્ત કયું છે?",
-            "a": "કર્કવૃત્ત",
-            "b": "વિષુવવૃત્ત",
-            "c": "મકરવૃત્ત",
-            "d": "ધ્રુવવૃત્ત",
-            "Correct Answer": "b"
-        },
-        {
-            "Question": "પૃથ્વી પોતાની ધરી પર ૧ ડિગ્રી રેખાંશ ફરતાં કેટલો સમય લે છે?",
-            "a": "૧ કલાક",
-            "b": "૧૫ મિનિટ",
-            "c": "૪ મિનિટ",
-            "d": "૪ સેકન્ડ",
-            "Correct Answer": "c"
+    try {
+        const sampleData = [
+            {
+                "Question": "પૃથ્વીના ગોળા પર સૌથી મોટું અક્ષાંશવૃત્ત કયું છે?",
+                "a": "કર્કવૃત્ત",
+                "b": "વિષુવવૃત્ત",
+                "c": "મકરવૃત્ત",
+                "d": "ધ્રુવવૃત્ત",
+                "Correct Answer": "b"
+            },
+            {
+                "Question": "પૃથ્વી પોતાની ધરી પર ૧ ડિગ્રી રેખાંશ ફરતાં કેટલો સમય લે છે?",
+                "a": "૧ કલાક",
+                "b": "૧૫ મિનિટ",
+                "c": "૪ મિનિટ",
+                "d": "૪ સેકન્ડ",
+                "Correct Answer": "c"
+            }
+        ];
+
+        const ws = XLSX.utils.json_to_sheet(sampleData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Questions");
+
+        const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+        function s2ab(s) {
+            const buf = new ArrayBuffer(s.length);
+            const view = new Uint8Array(buf);
+            for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+            return buf;
         }
+
+        const blob = new Blob([s2ab(wbout)], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "quiz_sample.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 200);
+
+    } catch (err) {
+        alert("ડાઉનલોડમાં સમસ્યા આવી: " + err.message);
+    }
+}
+
     ];
 
     // SheetJS ની મદદથી Excel ફાઈલ બનાવવી
