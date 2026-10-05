@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kahoot Live Quiz - સંપૂર્ણ પ્રશ્ન અને ઓપ્શન સાથે</title>
+    <title>Kahoot Live Quiz - પૂર્ણ એડમિન કંટ્રોલ</title>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <!-- PapaParse CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<!-- Excel (.xlsx) વાંચવા માટે SheetJS લાઈબ્રેરી -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Excel (.xlsx, .xls) વાંચવા માટે SheetJS લાઈબ્રેરી -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -22,7 +21,6 @@
         .btn:active { transform: scale(0.96); }
         .btn-green { background: #26890c; }
         .btn-upload { background: #f39c12; }
-        .btn-sample { background: #00897b; }
         .btn-broadcast { background: #e91e63; font-size: 20px; padding: 14px 28px; }
 
         input { width: 100%; max-width: 320px; padding: 14px; margin-bottom: 12px; font-size: 18px; border: 2px solid #ccc; border-radius: 8px; text-align: center; outline: none; }
@@ -39,7 +37,7 @@
         .player-badge { background: rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-size: 18px; }
         
         .admin-controls { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .question-card { background: white; color: #222; padding: 22px; border-radius: 15px; font-size: 22px; font-weight: bold; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: left; }
+        .question-card { background: white; color: #222; padding: 22px; border-radius: 15px; font-size: 22px; font-weight: bold; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: left; line-height: 1.4; }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .opt { padding: 18px; font-size: 19px; font-weight: bold; color: white; border-radius: 10px; text-align: left; }
         .opt-a { background: #e21b3c; }
@@ -60,21 +58,20 @@
         .p-name { font-size: 18px; background: rgba(0,0,0,0.4); width: 100%; padding: 6px 0; }
         .p-score { font-size: 15px; margin: 8px 0; }
 
-        /* PLAYER STYLES - મોબાઈલ સ્ક્રીન માટે */
+        /* PLAYER STYLES */
         #player-view { display: none; width: 100vw; min-height: 100vh; background: #f4f6f9; color: #333; flex-direction: column; align-items: center; justify-content: flex-start; padding: 15px; }
         #player-login-box { margin: auto; padding: 20px; width: 100%; max-width: 340px; }
         #player-wait-box { display: none; margin: auto; padding: 25px 15px; text-align: center; width: 100%; max-width: 480px; }
         .feedback-box { font-size: 22px; font-weight: bold; padding: 18px; border-radius: 12px; margin-bottom: 15px; }
         
-        /* વિદ્યાર્થીની સ્ક્રીન પર દેખાતું ક્વેશ્ચન બોક્સ */
         #player-question-container { display: none; width: 100%; max-width: 550px; margin: 10px auto; }
         .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; color: #555; }
         .player-q-card { background: white; color: #111; padding: 18px 20px; border-radius: 14px; font-size: 19px; font-weight: bold; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: left; line-height: 1.45; border-left: 6px solid #46178f; }
         
-        .player-opt-btn { width: 100%; border: none; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; font-size: 18px; font-weight: bold; color: white; display: flex; align-items: center; text-align: left; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: 0.15s; line-height: 1.35; }
+        .player-opt-btn { width: 100%; border: none; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; font-size: 18px; font-weight: bold; color: white; display: flex; align-items: center; text-align: left; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: 0.15s; }
         .player-opt-btn:active { transform: scale(0.97); }
         .player-opt-btn:disabled { opacity: 0.65; cursor: not-allowed; }
-        .shape-badge { font-size: 22px; margin-right: 14px; flex-shrink: 0; background: rgba(0,0,0,0.2); width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; }
+        .shape-badge { font-size: 20px; margin-right: 14px; flex-shrink: 0; background: rgba(0,0,0,0.2); width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; }
         .opt-text { flex-grow: 1; }
         
         .score-pill { background: #333; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 18px; display: inline-block; margin-top: 15px; }
@@ -104,11 +101,10 @@
         <div style="margin: 15px 0;">
             <button class="btn btn-broadcast" onclick="broadcastPin()">📡 પ્લેયર્સને PIN મોકલો</button>
             <br>
-            <button class="btn btn-sample" onclick="downloadSampleCSV()">📥 નમૂનાની CSV</button>
-            <input type="file" id="csvFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
-<button class="btn btn-upload" onclick="document.getElementById('csvFileInput').click()">📁 Excel ફાઈલ અપલોડ</button>
-
-            <div id="q-loaded-count" style="margin-top: 10px; font-weight: bold;">(૩ પ્રશ્નો ડિફોલ્ટ લોડ છે)</div>
+            <!-- Excel અને CSV બંને સપોર્ટ કરતું બટન -->
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
+            <button class="btn btn-upload" onclick="document.getElementById('excelFileInput').click()">📁 Excel / CSV ફાઈલ અપલોડ</button>
+            <div id="q-loaded-count" style="margin-top: 10px; font-weight: bold; color:#ffeb3b;">(કૃપા કરીને પ્રશ્નોની Excel ફાઈલ અપલોડ કરો)</div>
         </div>
 
         <div class="players-list" id="lobby-players"></div>
@@ -172,7 +168,7 @@
     </div>
 </div>
 
-<!-- ૨. પ્લેયર / ગેમર ઇન્ટરફેસ (વિદ્યાર્થીનો મોબાઈલ) -->
+<!-- ૨. પ્લેયર / ગેમર ઇન્ટરફેસ -->
 <div id="player-view">
     <div id="player-login-box">
         <h2 style="color:#333; margin-top: 40px;">જોડાવો ક્વિઝમાં</h2>
@@ -187,7 +183,7 @@
         <div class="score-pill">તમારો સ્કોર: <span id="my-score">0</span></div>
     </div>
 
-    <!-- પ્રશ્ન અને ઓપ્શન દર્શાવતું કન્ટેનર -->
+    <!-- વિદ્યાર્થીની સ્ક્રીન પર પ્રશ્ન અને ઓપ્શન્સ -->
     <div id="player-question-container">
         <div class="player-header">
             <span id="player-q-num">પ્રશ્ન ૧</span>
@@ -216,7 +212,7 @@
 </div>
 
 <script>
-// Firebase કન્ફિગરેશન
+// Firebase સેટઅપ
 const firebaseConfig = {
     apiKey: "AIzaSyAfd9LgR1le8ggiia7DFbz3MgzeKpj1AvA",
     databaseURL: "https://kahoot-game-2ad7e-default-rtdb.firebaseio.com",
@@ -225,12 +221,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let questions = [      ];
-
+let questions = [];
 let currentPin = "";
 let roomRef = null;
 
-// HOST
+// HOST કંટ્રોલ
 let currentQIdx = 0, timer = 30, timerInterval;
 
 function initHost() {
@@ -257,16 +252,7 @@ function broadcastPin() {
     alert("PIN બધા ગેમર્સની સ્ક્રીન પર મોકલી દેવાયો છે!");
 }
 
-function downloadSampleCSV() {
-    const csvContent = "\uFEFFQuestion,a,b,c,d,Correct Answer\n" +
-        "\"પૃથ્વી પર સૌથી મોટું અક્ષાંશવૃત્ત કયું છે?\",\"કર્કવૃત્ત\",\"વિષુવવૃત્ત\",\"મકરવૃત્ત\",\"ધ્રુવવૃત્ત\",\"b\"\n";
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "quiz_sample.csv";
-    link.click();
-}
-
+// Excel (.xlsx / .xls) અને CSV વાંચવાનું ફંક્શન
 function handleExcelUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -311,7 +297,7 @@ function handleExcelUpload(e) {
                 document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થયા!)`;
                 alert(`શાનદાર! ${questions.length} પ્રશ્નો સફળતાપૂર્વક Excel માંથી લોડ થઈ ગયા છે.`);
             } else {
-                alert("⚠ Excel ફોર્મેટ યોગ્ય નથી! કૃપા કરીને કોલમ (Question, a, b, c, d, Correct Answer) ચકાસો.");
+                alert("⚠ ફાઇલ યોગ્ય રીતે વાંચી શકાઈ નથી! કૃપા કરીને કોલમ (Question, a, b, c, d, Correct Answer) ચકાસો.");
             }
         } catch (err) {
             alert("ફાઈલ વાંચવામાં ભૂલ આવી: " + err.message);
@@ -320,20 +306,14 @@ function handleExcelUpload(e) {
     reader.readAsArrayBuffer(file);
 }
 
-    });
-}
-
 function adminStartGameCommand() {
-    function adminStartGameCommand() {
     if (!questions || questions.length === 0) {
-        alert("⚠ કૃપા કરીને પહેલાં 'Excel (CSV) અપલોડ' બટન પર ક્લિક કરીને ફાઈલ પસંદ કરો!");
+        alert("⚠ કૃપા કરીને પહેલાં 'Excel / CSV ફાઈલ અપલોડ' બટન પર ક્લિક કરીને ફાઈલ પસંદ કરો!");
         return;
     }
     document.getElementById('host-lobby').style.display = 'none';
     document.getElementById('host-game').style.display = 'block';
     loadHostQuestion(0);
-}
-
 }
 
 function loadHostQuestion(idx) {
@@ -347,7 +327,6 @@ function loadHostQuestion(idx) {
     document.getElementById('lbl-d').innerText = `■ ${q.d}`;
     document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
 
-    // Firebase પર પ્રશ્ન અને ઓપ્શન્સ પુશ કરવા
     roomRef.update({
         state: "question",
         currentQuestion: idx,
@@ -435,7 +414,7 @@ function showFinalPodium() {
     });
 }
 
-// PLAYER
+// PLAYER કંટ્રોલ
 let playerId = "p_" + Math.random().toString(36).substr(2, 9);
 let playerRoomRef = null;
 let currentScore = 0;
@@ -498,13 +477,11 @@ function listenPlayerGame() {
                 currentCorrect = (val.correctAnswer || "").toString().trim().toLowerCase();
                 qStartTime = val.questionStartTime || Date.now();
 
-                // પ્લેયર બટન સક્રિય કરવા
                 document.querySelectorAll('.player-opt-btn').forEach(btn => {
                     btn.disabled = false;
                     btn.style.opacity = '1';
                 });
 
-                // મોબાઇલમાં પ્રશ્ન અને ઓપ્શન્સ લોડ કરવા
                 document.getElementById('player-q-num').innerText = `પ્રશ્ન ${val.currentQuestion + 1}`;
                 document.getElementById('player-q-text').innerText = val.questionText || "પ્રશ્ન લોડ થઈ રહ્યો છે...";
                 if (val.options) {
@@ -538,7 +515,6 @@ function sendPlayerAnswer(selected) {
     if (hasAnswered) return;
     hasAnswered = true;
 
-    // બધા ઓપ્શન્સ ડિસેબલ કરી દેવા જેથી બીજી વાર ક્લિક ન થાય
     document.querySelectorAll('.player-opt-btn').forEach(btn => {
         btn.disabled = true;
     });
@@ -559,7 +535,6 @@ function sendPlayerAnswer(selected) {
     document.getElementById('my-score').innerText = currentScore;
     document.getElementById('player-live-score').innerText = currentScore;
 
-    // ૧ સેકન્ડ પછી વેઇટિંગ સ્ક્રીન બતાવી દેવી
     setTimeout(() => {
         document.getElementById('player-question-container').style.display = 'none';
         document.getElementById('player-wait-box').style.display = 'block';
