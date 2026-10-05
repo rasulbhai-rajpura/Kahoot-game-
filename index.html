@@ -88,13 +88,11 @@
 
 <!-- ૧. એડમિન / HOST ઇન્ટરફેસ -->
 <div id="host-view">
-    <!-- લોબી સ્ક્રીન -->
     <div class="container" id="host-lobby">
         <h2>👑 સંપૂર્ણ એડમિન કંટ્રોલ</h2>
         <div class="pin-box">PIN: <span id="room-pin">------</span></div>
         
         <div style="margin: 15px 0;">
-            <!-- પિન સેન્ડ બટન -->
             <button class="btn btn-broadcast" onclick="broadcastPin()">📡 પ્લેયર્સને PIN મોકલો</button>
             <br>
             <button class="btn btn-sample" onclick="downloadSampleCSV()">📥 નમૂનાની CSV</button>
@@ -105,7 +103,6 @@
 
         <div class="players-list" id="lobby-players"></div>
         <br>
-        <!-- ગેમ શરૂ કરવાનું કમાન્ડ બટન -->
         <button class="btn btn-green" style="font-size:24px; padding:15px 35px;" onclick="adminStartGameCommand()">▶ ગેમ શરૂ કરો (Start Game)</button>
     </div>
 
@@ -123,14 +120,13 @@
             <div class="opt opt-d" id="lbl-d">■ D</div>
         </div>
 
-        <!-- એડમિન કંટ્રોલ બાર (કોઈપણ સમયે આગળ જવા માટે) -->
         <div class="admin-controls">
             <button class="btn btn-upload" id="show-score-btn" onclick="showScores()">📊 સ્કોરબોર્ડ જુઓ</button>
             <button class="btn btn-green" onclick="adminForceNextQuestion()">⏩ આગળનો પ્રશ્ન (Next)</button>
         </div>
     </div>
 
-    <!-- વચ્ચેનું લીડરબોર્ડ -->
+    <!-- લીડરબોર્ડ -->
     <div class="container" id="host-leaderboard" style="display:none;">
         <h1>🏆 લાઈવ સ્કોરબોર્ડ (ટોપ ૫) 🏆</h1>
         <div id="scores-list"></div>
@@ -138,7 +134,7 @@
         <button class="btn btn-green" style="font-size:20px;" onclick="adminForceNextQuestion()">આગળનો પ્રશ્ન ➡</button>
     </div>
 
-    <!-- આખરી વિજેતા પોડિયમ -->
+    <!-- આખરી પોડિયમ -->
     <div class="container" id="host-podium" style="display:none;">
         <h1 style="font-size:36px; color:#ffd700;">🎉 ક્વિઝ વિજેતાઓ 🎉</h1>
         <div class="podium-container">
@@ -170,10 +166,9 @@
 <div id="player-view">
     <div id="player-login-box">
         <h2 style="color:#333;">જોડાવો ક્વિઝમાં</h2>
-        <!-- એડમિન દ્વારા સેન્ડ કરેલો પિન અહીં આપોઆપ આવી જશે -->
         <input type="number" id="pin-input" placeholder="ગેમ PIN (ઓટો આવશે)">
         <input type="text" id="name-input" placeholder="તમારું નામ લખો">
-        <button class="btn btn-green" style="width:100%;" onclick="joinPlayerRoom()">જોડાઓ (Enter)</button>
+        <button class="btn btn-green" id="btn-enter" style="width:100%;" onclick="joinPlayerRoom()">જોડાઓ (Enter)</button>
     </div>
 
     <div id="player-wait-box">
@@ -191,11 +186,11 @@
 </div>
 
 <script>
-// --- ૧. Firebase કન્ફિગરેશન (તમારી વિગતો મૂકો) ---
+// --- ૧. Firebase કન્ફિગરેશન (સુધારેલું) ---
 const firebaseConfig = {
     apiKey: "AIzaSyAfd9LgR1le8ggiia7DFbz3MgzeKpj1AvA",
-    databaseURL: "https://YOUR_DATABASE_NAME.firebaseio.com",
-    projectId: "https://kahoot-game-2ad7e-default-rtdb.firebaseio.com/"
+    databaseURL: "https://kahoot-game-2ad7e-default-rtdb.firebaseio.com",
+    projectId: "kahoot-game-2ad7e"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -232,15 +227,13 @@ function initHost() {
     });
 }
 
-// એડમિન PIN સેન્ડ કરે એટલે ગ્લોબલ નોડ પર બ્રોડકાસ્ટ થાય
 function broadcastPin() {
     db.ref('active_broadcast').set({ pin: currentPin });
     alert("PIN બધા ગેમર્સની સ્ક્રીન પર મોકલી દેવાયો છે!");
 }
 
-// CSV ફાઈલ નમૂનો
 function downloadSampleCSV() {
-    const csvContent = "\uFEFFQuestion,OptionA,OptionB,OptionC,OptionD,Correct\n" +
+    const csvContent = "\uFEFFQuestion,a,b,c,d,Correct Answer\n" +
         "\"બક્સરના યુદ્ધ પછી કયા શાસકો સાથે સંધિ થઈ?\",\"અવધના નવાબ અને મુઘલ બાદશાહ\",\"મીરકાસીમ\",\"નિઝામ\",\"સિરાજ-ઉદ-દૌલા\",\"a\"\n" +
         "\"કાયમી જમાબંધી પદ્ધતિ ક્યારે અમલમાં આવી?\",\"ઈ.સ. 1757\",\"ઈ.સ. 1772\",\"ઈ.સ. 1793\",\"ઈ.સ. 1857\",\"c\"\n" +
         "\"રૈયતવારી પદ્ધતિના પ્રણેતા કોણ હતા?\",\"હોલ્ટ મેકેન્ઝી\",\"થોમસ મૂનરો\",\"કોર્નવોલિસ\",\"રોબર્ટ ક્લાઇવ\",\"b\"\n";
@@ -263,17 +256,23 @@ function handleCSV(e) {
             let parsed = [];
             results.data.forEach(row => {
                 const keys = Object.keys(row);
-                const getVal = (pattern) => {
-                    const k = keys.find(key => key.trim().toLowerCase().includes(pattern));
+                const getVal = (target) => {
+                    const k = keys.find(key => key.trim().toLowerCase() === target.toLowerCase() || key.trim().toLowerCase().includes(target.toLowerCase()));
                     return k && row[k] ? row[k].toString().trim() : "";
                 };
 
-                const q = getVal("quest");
-                const a = getVal("optiona") || getVal("a");
-                const b = getVal("optionb") || getVal("b");
-                const c = getVal("optionc") || getVal("c");
-                const d = getVal("optiond") || getVal("d");
-                const correct = (getVal("corr") || "").toLowerCase().trim();
+                const q = getVal("question") || getVal("quest");
+                const a = getVal("answer 1") || getVal("optiona") || row['a'] || row['A'] || "";
+                const b = getVal("answer 2") || getVal("optionb") || row['b'] || row['B'] || "";
+                const c = getVal("answer 3") || getVal("optionc") || row['c'] || row['C'] || "";
+                const d = getVal("answer 4") || getVal("optiond") || row['d'] || row['D'] || "";
+                let correct = (getVal("correct") || "").toLowerCase().trim();
+
+                // જો સાચો જવાબ નંબર સ્વરૂપે હોય (1, 2, 3, 4) તો તેને a, b, c, d માં કન્વર્ટ કરો
+                if (correct === "1") correct = "a";
+                if (correct === "2") correct = "b";
+                if (correct === "3") correct = "c";
+                if (correct === "4") correct = "d";
 
                 if (q && a && b && c && d && ['a','b','c','d'].includes(correct)) {
                     parsed.push({ q, a, b, c, d, correct });
@@ -285,13 +284,12 @@ function handleCSV(e) {
                 document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થયા!)`;
                 alert(`${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થઈ ગયા છે.`);
             } else {
-                alert("CSV ફોર્મેટ યોગ્ય નથી!");
+                alert("CSV ફોર્મેટ યોગ્ય નથી! મહેરબાની કરીને પ્રશ્નો અને વિકલ્પો ચકાસો.");
             }
         }
     });
 }
 
-// એડમિન ગેમ શરૂ કરવાનો આદેશ આપે ત્યારે જ ગેમ શરૂ થાય
 function adminStartGameCommand() {
     document.getElementById('host-lobby').style.display = 'none';
     document.getElementById('host-game').style.display = 'block';
@@ -309,7 +307,6 @@ function loadHostQuestion(idx) {
     document.getElementById('lbl-d').innerText = `■ ${q.d}`;
     document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
 
-    // Firebase સિંક
     roomRef.update({
         state: "question",
         currentQuestion: idx,
@@ -336,7 +333,6 @@ function timeUpHost() {
     roomRef.update({ state: "timeup" });
 }
 
-// ૨૦ સેકન્ડ પૂરી ન થઈ હોય તો પણ એડમિન આગળ વધી શકે
 function adminForceNextQuestion() {
     clearInterval(timerInterval);
     if (currentQIdx + 1 < questions.length) {
@@ -356,7 +352,6 @@ function showScores() {
     roomRef.child('players').once('value', snapshot => {
         let players = [];
         snapshot.forEach(c => players.push(c.val()));
-        // સ્કોર મુજબ સોર્ટ
         players.sort((a, b) => (b.score || 0) - (a.score || 0));
 
         const list = document.getElementById('scores-list');
@@ -410,7 +405,6 @@ function initPlayer() {
     document.getElementById('role-select-view').style.display = 'none';
     document.getElementById('player-view').style.display = 'flex';
 
-    // એડમિન જ્યારે PIN સેન્ડ કરશે ત્યારે સીધો અહીં ઓટોમેટિક આવી જશે!
     db.ref('active_broadcast').on('value', snap => {
         if(snap.exists() && snap.val().pin) {
             document.getElementById('pin-input').value = snap.val().pin;
@@ -423,21 +417,29 @@ function joinPlayerRoom() {
     const name = document.getElementById('name-input').value.trim();
     if (!pin || !name) return alert("PIN અને નામ લખવું જરૂરી છે!");
 
+    const enterBtn = document.getElementById('btn-enter');
+    enterBtn.innerText = "જોડાઈ રહ્યા છીએ...";
+    enterBtn.disabled = true;
+
     playerRoomRef = db.ref('rooms/' + pin);
 
-    playerRoomRef.once('value', snap => {
+    playerRoomRef.once('value').then(snap => {
         if (!snap.exists()) {
-            alert("રૂમ PIN મળ્યો નથી! એડમિન PIN મોકલે તેની રાહ જુઓ.");
-            return;
+            enterBtn.innerText = "જોડાઓ (Enter)";
+            enterBtn.disabled = false;
+            return alert("રૂમ PIN મળ્યો નથી! તપાસો કે એડમિને પેનલ ઓપન કરી છે કે નહીં.");
         }
 
-        playerRoomRef.child('players/' + playerId).set({ name: name, score: 0 });
-
-        document.getElementById('player-login-box').style.display = 'none';
-        document.getElementById('player-wait-box').style.display = 'block';
-        document.getElementById('wait-msg').innerText = "એડમિન ગેમ શરૂ કરે તેની રાહ જુઓ...";
-
-        listenPlayerGame();
+        playerRoomRef.child('players/' + playerId).set({ name: name, score: 0 }).then(() => {
+            document.getElementById('player-login-box').style.display = 'none';
+            document.getElementById('player-wait-box').style.display = 'block';
+            document.getElementById('wait-msg').innerText = "એડમિન ગેમ શરૂ કરે તેની રાહ જુઓ...";
+            listenPlayerGame();
+        });
+    }).catch(err => {
+        enterBtn.innerText = "જોડાઓ (Enter)";
+        enterBtn.disabled = false;
+        alert("કનેક્શન એરર: " + err.message);
     });
 }
 
@@ -446,7 +448,6 @@ function listenPlayerGame() {
         const val = snap.val();
         if (!val) return;
 
-        // પ્રશ્ન મોડ
         if (val.state === "question") {
             if (val.currentQuestion !== lastProcessedQ) {
                 lastProcessedQ = val.currentQuestion;
@@ -459,7 +460,6 @@ function listenPlayerGame() {
                 document.getElementById('player-answer-grid').style.display = 'grid';
             }
         } 
-        // સમય પૂરો કે એડમિન દ્વારા ફોર્સ નેક્સ્ટ
         else if (val.state === "timeup") {
             document.getElementById('player-answer-grid').style.display = 'none';
             document.getElementById('player-wait-box').style.display = 'block';
@@ -480,7 +480,6 @@ function sendPlayerAnswer(selected) {
     if (hasAnswered) return;
     hasAnswered = true;
 
-    // ટચ થતાં જ તરત બટન હટી જશે
     document.getElementById('player-answer-grid').style.display = 'none';
     document.getElementById('player-wait-box').style.display = 'block';
 
