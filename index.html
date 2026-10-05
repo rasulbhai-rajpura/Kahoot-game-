@@ -102,6 +102,8 @@
             <button class="btn btn-broadcast" onclick="broadcastPin()">📡 પ્લેયર્સને PIN મોકલો</button>
             <br>
             <!-- Excel અને CSV બંને સપોર્ટ કરતું બટન -->
+<button class="btn" style="background:#00897b;" onclick="downloadSampleExcel()">📥 નમૂનાની Excel ફાઈલ</button>
+
             <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
             <button class="btn btn-upload" onclick="document.getElementById('excelFileInput').click()">📁 Excel / CSV ફાઈલ અપલોડ</button>
             <div id="q-loaded-count" style="margin-top: 10px; font-weight: bold; color:#ffeb3b;">(કૃપા કરીને પ્રશ્નોની Excel ફાઈલ અપલોડ કરો)</div>
@@ -248,6 +250,37 @@ function initHost() {
 }
 
 function broadcastPin() {
+    // નમૂનાની તૈયાર Excel (.xlsx) ફાઈલ ડાઉનલોડ કરવાનું ફંક્શન
+function downloadSampleExcel() {
+    // નમૂનાના ડેટાનું માળખું
+    const sampleData = [
+        {
+            "Question": "પૃથ્વીના ગોળા પર સૌથી મોટું અક્ષાંશવૃત્ત કયું છે?",
+            "a": "કર્કવૃત્ત",
+            "b": "વિષુવવૃત્ત",
+            "c": "મકરવૃત્ત",
+            "d": "ધ્રુવવૃત્ત",
+            "Correct Answer": "b"
+        },
+        {
+            "Question": "પૃથ્વી પોતાની ધરી પર ૧ ડિગ્રી રેખાંશ ફરતાં કેટલો સમય લે છે?",
+            "a": "૧ કલાક",
+            "b": "૧૫ મિનિટ",
+            "c": "૪ મિનિટ",
+            "d": "૪ સેકન્ડ",
+            "Correct Answer": "c"
+        }
+    ];
+
+    // SheetJS ની મદદથી Excel ફાઈલ બનાવવી
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Questions");
+
+    // ફાઈલ ડાઉનલોડ કરવી
+    XLSX.writeFile(wb, "ક્વિઝ_નમૂનાની_ફાઈલ.xlsx");
+}
+    
     db.ref('active_broadcast').set({ pin: currentPin });
     alert("PIN બધા ગેમર્સની સ્ક્રીન પર મોકલી દેવાયો છે!");
 }
