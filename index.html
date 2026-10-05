@@ -1,352 +1,510 @@
 <!DOCTYPE html>
 <html lang="gu">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI ખેડૂત મિત્ર | સંપૂર્ણ ડિજિટલ સાથી</title>
-  <style>
-    :root {
-      --primary: #2e7d32;
-      --primary-dark: #1b5e20;
-      --bg: #f4f7f4;
-      --card-bg: #ffffff;
-      --text: #2c3e50;
-    }
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 30px; }
-    .header {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: white; padding: 18px 12px; text-align: center;
-      border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    }
-    .header h1 { font-size: 20px; margin-bottom: 4px; }
-    .header p { font-size: 13px; opacity: 0.9; }
-    .school-tag {
-      display: inline-block; background: rgba(255,255,255,0.2);
-      padding: 4px 10px; border-radius: 12px; font-size: 11px; margin-top: 6px;
-    }
-    .nav-tabs {
-      display: flex; overflow-x: auto; gap: 8px; padding: 12px 10px;
-      background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-      position: sticky; top: 0; z-index: 100;
-    }
-    .nav-btn {
-      white-space: nowrap; border: 1px solid #dcedc8; background: #f1f8e9;
-      color: var(--primary-dark); padding: 8px 14px; border-radius: 20px;
-      font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;
-    }
-    .nav-btn.active {
-      background: var(--primary); color: white; border-color: var(--primary);
-    }
-    .container { max-width: 600px; margin: 12px auto; padding: 0 12px; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .card {
-      background: var(--card-bg); border-radius: 12px; padding: 16px;
-      margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .btn-main {
-      width: 100%; padding: 12px; background: var(--primary); color: white;
-      border: none; border-radius: 8px; font-weight: bold; font-size: 15px;
-      cursor: pointer; margin-top: 10px;
-    }
-    .btn-main:disabled { background: #a5d6a7; }
-    input[type="text"] {
-      width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;
-      font-size: 14px;
-    }
-    .weather-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
-    }
-    .weather-box {
-      background: #f1f8e9; padding: 10px; border-radius: 8px; text-align: center;
-    }
-    .advisory-box {
-      background: #fffde7; border-left: 4px solid #fbc02d;
-      padding: 10px; border-radius: 6px; margin-top: 12px; font-size: 13px;
-    }
-    .result-box {
-      background: white; border-radius: 10px; padding: 14px; margin-top: 15px;
-      border-left: 5px solid var(--primary);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kahoot Live Quiz - પૂર્ણ એડમિન કંટ્રોલ</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- PapaParse CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #46178f; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        
+        .container { width: 90%; max-width: 850px; padding: 20px; margin: auto; }
+        .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 6px; transition: 0.2s; }
+        .btn:active { transform: scale(0.96); }
+        .btn-green { background: #26890c; }
+        .btn-upload { background: #f39c12; }
+        .btn-sample { background: #00897b; }
+        .btn-broadcast { background: #e91e63; font-size: 20px; padding: 14px 28px; }
+        .btn-danger { background: #d32f2f; }
+
+        input { width: 100%; max-width: 320px; padding: 14px; margin-bottom: 12px; font-size: 18px; border: 2px solid #ccc; border-radius: 8px; text-align: center; outline: none; }
+
+        /* Role Selection */
+        #role-select-view { display: block; }
+        .btn-role-admin { background: #1368ce; font-size: 22px; padding: 18px 30px; }
+        .btn-role-player { background: #e21b3c; font-size: 22px; padding: 18px 30px; }
+
+        /* ADMIN / HOST STYLES */
+        #host-view { display: none; width: 100%; }
+        .pin-box { font-size: 40px; font-weight: bold; background: white; color: #333; padding: 12px 28px; border-radius: 12px; display: inline-block; margin: 15px 0; }
+        .players-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; margin-top: 15px; }
+        .player-badge { background: rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-size: 18px; }
+        
+        .admin-controls { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .question-card { background: white; color: #222; padding: 25px; border-radius: 15px; font-size: 24px; font-weight: bold; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .opt { padding: 20px; font-size: 20px; font-weight: bold; color: white; border-radius: 10px; text-align: left; }
+        .opt-a { background: #e21b3c; }
+        .opt-b { background: #1368ce; }
+        .opt-c { background: #d89e00; }
+        .opt-d { background: #26890c; }
+        .opt.correct-highlight { outline: 6px solid #fff; transform: scale(1.03); box-shadow: 0 0 20px #fff; }
+
+        .score-row { background: white; color: #333; margin: 8px auto; max-width: 500px; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; }
+        
+        /* Podium Styles */
+        .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 15px; height: 320px; margin: 30px auto; max-width: 650px; }
+        .podium-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 170px; border-radius: 15px 15px 0 0; color: white; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        .p-gold { background: linear-gradient(180deg, #ffd700, #b8860b); height: 260px; order: 2; }
+        .p-silver { background: linear-gradient(180deg, #e0e0e0, #757575); height: 200px; order: 1; }
+        .p-bronze { background: linear-gradient(180deg, #cd7f32, #8b4513); height: 150px; order: 3; }
+        .crown { font-size: 42px; margin-bottom: 5px; }
+        .p-name { font-size: 18px; background: rgba(0,0,0,0.4); width: 100%; padding: 6px 0; }
+        .p-score { font-size: 15px; margin: 8px 0; }
+
+        /* PLAYER STYLES */
+        #player-view { display: none; width: 100vw; height: 100vh; background: #f0f2f5; color: #333; }
+        #player-login-box { margin: auto; padding: 20px; width: 90%; max-width: 320px; }
+        #player-wait-box { display: none; margin: auto; padding: 20px; text-align: center; }
+        .feedback-box { font-size: 24px; font-weight: bold; padding: 18px; border-radius: 12px; margin-bottom: 15px; }
+        
+        #player-answer-grid { display: none; width: 100vw; height: 100vh; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; padding: 12px; }
+        .k-btn { border: none; border-radius: 15px; font-size: 65px; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .k-btn:active { transform: scale(0.92); filter: brightness(0.8); }
+        .score-pill { background: #333; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 18px; display: inline-block; margin-top: 15px; }
+    </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>🌱 AI ખેડૂત મિત્ર</h1>
-    <p>સંપૂર્ણ ડિજિટલ કૃષિ સાથી | ધરણીધર, વાવ, થરાદ</p>
-    <div class="school-tag">શ્રી પાનસડા અનુપમ પ્રાથમિક શાળા | માર્ગદર્શક: શ્રી રાજપુરા રસુલભાઈ</div>
-  </div>
+<audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
 
-  <!-- નેવિગેશન બટન્સ -->
-  <div class="nav-tabs">
-    <button class="nav-btn active" onclick="switchTab('advisor')">🌾 ૧. ખેતી સલાહકાર</button>
-    <button class="nav-btn" onclick="switchTab('weather')">🌦️ ૨. હવામાન સૂચના</button>
-    <button class="nav-btn" onclick="switchTab('disease')">🌿 ૩. પાક રોગ નિદાન</button>
-    <button class="nav-btn" onclick="switchTab('mandi')">💰 ૪. બજાર ભાવ</button>
-    <button class="nav-btn" onclick="switchTab('schemes')">📜 ૫. સહાય યોજનાઓ</button>
-  </div>
-
-  <div class="container">
-
-    <!-- ૧. ખેતી સલાહકાર -->
-    <div id="tab-advisor" class="tab-content active">
-      <div class="card">
-        <h3 style="color: var(--primary);">🎙️ કૃષિ સલાહકાર (કંઈ પણ પૂછો)</h3>
-        <p style="font-size: 12px; color: #666; margin-top: 4px;">પાક, વાવણી, ખાતર કે દવા વિશે કોઈ પણ પ્રશ્ન લખો અથવા માઇકથી બોલો:</p>
-        <div style="display: flex; gap: 6px; margin-top: 10px;">
-          <input type="text" id="advisorQuery" placeholder="દા.ત. જીરામાં સુકારો અટકાવવા શું કરવું?">
-          <button type="button" onclick="startVoice('advisorQuery')" style="padding: 0 14px; background: #e0f2f1; border: 1px solid #80cbc4; border-radius: 8px; font-size: 18px; cursor: pointer;">🎤</button>
-        </div>
-        <button id="adviseBtn" class="btn-main" onclick="askAdvisor()">સલાહ મેળવો 🔍</button>
-      </div>
-      <div id="advisorResult" class="result-box" style="display: none;"></div>
+<!-- ૦. મુખ્ય સ્ક્રીન -->
+<div id="role-select-view" class="container">
+    <h1 style="font-size:32px;">શ્રી પાનસડા અનુપમ પ્રાથમિક શાળા</h1>
+    <h2>તમે કઈ રીતે જોડાવા માંગો છો?</h2>
+    <div style="margin-top: 30px;">
+        <button class="btn btn-role-admin" onclick="initHost()">🖥 એડમિન પેનલ (Host)</button>
+        <br><br>
+        <button class="btn btn-role-player" onclick="initPlayer()">📱 ગેમર / પ્લેયર (Student)</button>
     </div>
+</div>
 
-    <!-- ૨. હવામાન અને ખેતી સૂચના -->
-    <div id="tab-weather" class="tab-content">
-      <div class="card">
-        <h3 style="color: var(--primary);">🌦️ લાઈવ ખેતર હવામાન અને કૃષિ સલાહ</h3>
-        <p id="geo-status" style="font-size: 12px; color: #666; margin-top: 4px;">તમારા વિસ્તારનું હવામાન મેળવી રહ્યું છે...</p>
+<!-- ૧. એડમિન / HOST ઇન્ટરફેસ -->
+<div id="host-view">
+    <!-- લોબી સ્ક્રીન -->
+    <div class="container" id="host-lobby">
+        <h2>👑 સંપૂર્ણ એડમિન કંટ્રોલ</h2>
+        <div class="pin-box">PIN: <span id="room-pin">------</span></div>
         
-        <div class="weather-grid">
-          <div class="weather-box">🌡️ તાપમાન<br><b id="w-temp">--</b></div>
-          <div class="weather-box">💨 પવનની ગતિ<br><b id="w-wind">--</b></div>
-          <div class="weather-box">🌧️ વરસાદ<br><b id="w-rain">--</b></div>
-          <div class="weather-box">💧 હવામાં ભેજ<br><b id="w-humidity">--</b></div>
+        <div style="margin: 15px 0;">
+            <!-- પિન સેન્ડ બટન -->
+            <button class="btn btn-broadcast" onclick="broadcastPin()">📡 પ્લેયર્સને PIN મોકલો</button>
+            <br>
+            <button class="btn btn-sample" onclick="downloadSampleCSV()">📥 નમૂનાની CSV</button>
+            <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSV(event)">
+            <button class="btn btn-upload" onclick="document.getElementById('csvFileInput').click()">📁 Excel (CSV) અપલોડ</button>
+            <div id="q-loaded-count" style="margin-top: 10px; font-weight: bold;">(૩ પ્રશ્નો ડિફોલ્ટ લોડ છે)</div>
         </div>
 
-        <div class="advisory-box">
-          <b>📢 આજની કૃષિ સૂચના:</b>
-          <div id="agro-advisory" style="margin-top: 5px;">હવામાન વિગતો તપાસી સલાહ તૈયાર થઈ રહી છે...</div>
-        </div>
-      </div>
+        <div class="players-list" id="lobby-players"></div>
+        <br>
+        <!-- ગેમ શરૂ કરવાનું કમાન્ડ બટન -->
+        <button class="btn btn-green" style="font-size:24px; padding:15px 35px;" onclick="adminStartGameCommand()">▶ ગેમ શરૂ કરો (Start Game)</button>
     </div>
 
-    <!-- ૩. પાક રોગ નિદાન -->
-    <div id="tab-disease" class="tab-content">
-      <div class="card">
-        <h3 style="color: var(--primary);">🌿 પાક રોગ નિદાન કેન્દ્ર</h3>
-        <p style="font-size: 12px; color: #666; margin-top: 4px;">પાક અથવા રોગિષ્ટ પાંદડાનો ફોટો પાડો અથવા અપલોડ કરો:</p>
-
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleImage(event)">
-        <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="handleImage(event)">
-
-        <div style="display: flex; gap: 10px; margin-top: 12px;">
-          <button type="button" onclick="document.getElementById('cameraInput').click()" style="flex: 1; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">📸 લાઈવ કેમેરો</button>
-          <button type="button" onclick="document.getElementById('galleryInput').click()" style="flex: 1; padding: 12px; background: #1565c0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">🖼️ ગેલેરીમાંથી</button>
+    <!-- પ્રશ્ન સ્ક્રીન -->
+    <div class="container" id="host-game" style="display:none;">
+        <div style="display:flex; justify-content:space-between; font-size:22px; margin-bottom:10px;">
+            <span id="q-counter">પ્રશ્ન ૧</span>
+            <span>⏱ સમય: <span id="timer-val" style="color:#ffeb3b; font-weight:bold;">20</span> સેકન્ડ</span>
+        </div>
+        <div class="question-card" id="q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
+        <div class="options-grid">
+            <div class="opt opt-a" id="lbl-a">▲ A</div>
+            <div class="opt opt-b" id="lbl-b">◆ B</div>
+            <div class="opt opt-c" id="lbl-c">● C</div>
+            <div class="opt opt-d" id="lbl-d">■ D</div>
         </div>
 
-        <center><img id="preview-img" style="max-width: 100%; border-radius: 8px; margin-top: 12px; display: none;"></center>
-
-        <input type="text" id="diseaseQuery" placeholder="વધારાની કોઈ વિગત લખવી હોય તો (ઓપ્શનલ)" style="margin-top: 10px;">
-        <button id="analyzeBtn" class="btn-main" onclick="analyzeCrop()">રોગનું નિદાન કરો 🔬</button>
-      </div>
-
-      <div id="diseaseResult" class="result-box" style="display: none;"></div>
+        <!-- એડમિન કંટ્રોલ બાર (કોઈપણ સમયે આગળ જવા માટે) -->
+        <div class="admin-controls">
+            <button class="btn btn-upload" id="show-score-btn" onclick="showScores()">📊 સ્કોરબોર્ડ જુઓ</button>
+            <button class="btn btn-green" onclick="adminForceNextQuestion()">⏩ આગળનો પ્રશ્ન (Next)</button>
+        </div>
     </div>
 
-    <!-- ૪. બજાર ભાવ (APMC) -->
-    <div id="tab-mandi" class="tab-content">
-      <div class="card">
-        <h3 style="color: var(--primary);">💰 મુખ્ય માર્કેટ યાર્ડ અંદાજિત ભાવ (૨૦ કિલો / મણ)</h3>
-        <p style="font-size: 12px; color: #666; margin-top: 4px;">બનાસકાંઠા અને નજીકના યાર્ડના મુખ્ય પાકોના સરેરાશ બજાર ભાવ:</p>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px;">
-          <tr style="background: #e8f5e9; text-align: left;">
-            <th style="padding: 8px; border: 1px solid #c8e6c9;">પાક</th>
-            <th style="padding: 8px; border: 1px solid #c8e6c9;">નીચો ભાવ (₹/મણ)</th>
-            <th style="padding: 8px; border: 1px solid #c8e6c9;">ઊંચો ભાવ (₹/મણ)</th>
-          </tr>
-          <tr><td style="padding: 8px; border: 1px solid #eee;">જીરું</td><td style="padding: 8px; border: 1px solid #eee;">₹4,200</td><td style="padding: 8px; border: 1px solid #eee;">₹5,400</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #eee;">રાયડો</td><td style="padding: 8px; border: 1px solid #eee;">₹950</td><td style="padding: 8px; border: 1px solid #eee;">₹1,120</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #eee;">એરંડા</td><td style="padding: 8px; border: 1px solid #eee;">₹1,140</td><td style="padding: 8px; border: 1px solid #eee;">₹1,260</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #eee;">ઇસબગુલ</td><td style="padding: 8px; border: 1px solid #eee;">₹2,400</td><td style="padding: 8px; border: 1px solid #eee;">₹3,100</td></tr>
-          <tr><td style="padding: 8px; border: 1px solid #eee;">બાજરી / ઘઉં</td><td style="padding: 8px; border: 1px solid #eee;">₹440</td><td style="padding: 8px; border: 1px solid #eee;">₹560</td></tr>
-        </table>
-        <p style="font-size: 11px; color: #888; margin-top: 8px;">* નોંધ: સ્થાનિક માર્કેટ યાર્ડની આવક મુજબ ભાવમાં દૈનિક ફેરફાર થઈ શકે છે.</p>
-      </div>
+    <!-- વચ્ચેનું લીડરબોર્ડ -->
+    <div class="container" id="host-leaderboard" style="display:none;">
+        <h1>🏆 લાઈવ સ્કોરબોર્ડ (ટોપ ૫) 🏆</h1>
+        <div id="scores-list"></div>
+        <br>
+        <button class="btn btn-green" style="font-size:20px;" onclick="adminForceNextQuestion()">આગળનો પ્રશ્ન ➡</button>
     </div>
 
-    <!-- ૫. સરકારી યોજનાઓ -->
-    <div id="tab-schemes" class="tab-content">
-      <div class="card">
-        <h3 style="color: var(--primary);">📜 સરકારી સહાય અને યોજનાઓ (i-Khedut)</h3>
-        
-        <div style="margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-          <h4 style="color: #1b5e20;">૧. તાર ફેન્સિંગ સહાય યોજના</h4>
-          <p style="font-size: 12px; color: #555;">જંગલી પ્રાણીઓથી પાકના રક્ષણ માટે ખેતરની ફરતે કાંટાળી તારની વાડ બનાવવા માટે 50% કે નિયત સહાય મળવાપાત્ર છે.</p>
+    <!-- આખરી વિજેતા પોડિયમ -->
+    <div class="container" id="host-podium" style="display:none;">
+        <h1 style="font-size:36px; color:#ffd700;">🎉 ક્વિઝ વિજેતાઓ 🎉</h1>
+        <div class="podium-container">
+            <div class="podium-step p-silver">
+                <div class="crown">🥈</div>
+                <div class="p-name" id="podium-2-name">-</div>
+                <div class="p-score" id="podium-2-score">0 pts</div>
+                <div style="font-size:24px; padding-bottom:10px;">2</div>
+            </div>
+            <div class="podium-step p-gold">
+                <div class="crown">👑🥇</div>
+                <div class="p-name" id="podium-1-name">-</div>
+                <div class="p-score" id="podium-1-score">0 pts</div>
+                <div style="font-size:30px; padding-bottom:10px;">1</div>
+            </div>
+            <div class="podium-step p-bronze">
+                <div class="crown">🥉</div>
+                <div class="p-name" id="podium-3-name">-</div>
+                <div class="p-score" id="podium-3-score">0 pts</div>
+                <div style="font-size:20px; padding-bottom:10px;">3</div>
+            </div>
         </div>
+        <br>
+        <button class="btn btn-green" onclick="location.reload()">નવી ગેમ શરૂ કરો 🔄</button>
+    </div>
+</div>
 
-        <div style="margin-top: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-          <h4 style="color: #1b5e20;">૨. સ્માર્ટફોન અને કૃષિ સાધનો સબસિડી</h4>
-          <p style="font-size: 12px; color: #555;">ખેડૂતોને સ્માર્ટફોન ખરીદી તેમજ ટ્રેક્ટર સંચાલિત વિવિધ આધુનિક ઓજારો માટે સહાય.</p>
-        </div>
-
-        <div style="margin-top: 10px;">
-          <h4 style="color: #1b5e20;">૩. સોલાર વોટર પમ્પિંગ સિસ્ટમ</h4>
-          <p style="font-size: 12px; color: #555;">ખેતરમાં પિયત માટે સૂર્યઊર્જા આધારિત પંપ લગાવવા માટે મોટા પાયે સબસિડી ઉપલબ્ધ છે.</p>
-        </div>
-      </div>
+<!-- ૨. પ્લેયર / ગેમર ઇન્ટરફેસ -->
+<div id="player-view">
+    <div id="player-login-box">
+        <h2 style="color:#333;">જોડાવો ક્વિઝમાં</h2>
+        <!-- એડમિન દ્વારા સેન્ડ કરેલો પિન અહીં આપોઆપ આવી જશે -->
+        <input type="number" id="pin-input" placeholder="ગેમ PIN (ઓટો આવશે)">
+        <input type="text" id="name-input" placeholder="તમારું નામ લખો">
+        <button class="btn btn-green" style="width:100%;" onclick="joinPlayerRoom()">જોડાઓ (Enter)</button>
     </div>
 
-  </div>
+    <div id="player-wait-box">
+        <div id="feedback-container"></div>
+        <h2 id="wait-msg" style="color:#555;">એડમિન ગેમ શરૂ કરે તેની રાહ જુઓ...</h2>
+        <div class="score-pill">તમારો સ્કોર: <span id="my-score">0</span></div>
+    </div>
 
-  <script>
-    let base64Image = null;
+    <div id="player-answer-grid">
+        <button type="button" class="k-btn opt-a" onpointerdown="sendPlayerAnswer('a')">▲</button>
+        <button type="button" class="k-btn opt-b" onpointerdown="sendPlayerAnswer('b')">◆</button>
+        <button type="button" class="k-btn opt-c" onpointerdown="sendPlayerAnswer('c')">●</button>
+        <button type="button" class="k-btn opt-d" onpointerdown="sendPlayerAnswer('d')">■</button>
+    </div>
+</div>
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById('tab-' + tabId).classList.add('active');
-      event.currentTarget.classList.add('active');
-    }
+<script>
+// --- ૧. Firebase કન્ફિગરેશન (તમારી વિગતો મૂકો) ---
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    databaseURL: "https://YOUR_DATABASE_NAME.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    function handleImage(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        const preview = document.getElementById('preview-img');
-        preview.src = evt.target.result;
-        preview.style.display = 'block';
-        base64Image = evt.target.result.split(',')[1];
-      };
-      reader.readAsDataURL(file);
-    }
+let questions = [
+    { "q": "બક્સરના યુદ્ધમાં વિજય મેળવ્યા બાદ ક્લાઇવે કયા શાસકો સાથે સંધિ કરી હતી?", "a": "અવધના નવાબ અને મુઘલ બાદશાહ", "b": "મીરકાસીમ અને મરાઠા શાસક", "c": "નિઝામ અને ટીપુ સુલતાન", "d": "બંગાળના નવાબ અને ફ્રેન્ચો", "correct": "a" },
+    { "q": "કાયમી જમાબંધી મહેસૂલ પદ્ધતિ ભારતમાં કયા વર્ષમાં દાખલ કરવામાં આવી હતી?", "a": "ઈ.સ. 1757", "b": "ઈ.સ. 1772", "c": "ઈ.સ. 1793", "d": "ઈ.સ. 1857", "correct": "c" },
+    { "q": "રૈયતવારી પદ્ધતિના પ્રણેતા કોણ હતા?", "a": "હોલ્ટ મેકેન્ઝી", "b": "થોમસ મૂનરો", "c": "કોર્નવોલિસ", "d": "રોબર્ટ ક્લાઇવ", "correct": "b" }
+];
 
-    function startVoice(targetId) {
-      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        alert("તમારા ફોનમાં માઇક સપોર્ટ નથી. કૃપા કરીને ટાઇપ કરો.");
-        return;
-      }
-      const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const rec = new Speech();
-      rec.lang = 'gu-IN';
-      rec.onresult = (e) => {
-        document.getElementById(targetId).value = e.results[0][0].transcript;
-      };
-      rec.start();
-    }
+let currentPin = "";
+let roomRef = null;
 
-    async function askAdvisor() {
-      const q = document.getElementById('advisorQuery').value;
-      if (!q) return alert("કૃપા કરીને પ્રશ્ન લખો અથવા માઇકથી બોલો.");
-      
-      const btn = document.getElementById('adviseBtn');
-      const resBox = document.getElementById('advisorResult');
-      btn.disabled = true;
-      btn.innerText = "જવાબ વિચારી રહ્યું છે...";
-      resBox.style.display = 'none';
+// ======================= એડમિન (HOST) લોજિક =======================
+let currentQIdx = 0, timer = 20, timerInterval;
 
-      try {
-        const res = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ type: 'advisor', query: q })
+function initHost() {
+    document.getElementById('role-select-view').style.display = 'none';
+    document.getElementById('host-view').style.display = 'block';
+
+    currentPin = Math.floor(100000 + Math.random() * 900000).toString();
+    document.getElementById('room-pin').innerText = currentPin;
+    
+    roomRef = db.ref('rooms/' + currentPin);
+    roomRef.set({ state: "lobby", currentQuestion: -1, broadcasted: false });
+
+    // જોડાયેલા પ્લેયર્સ લાઈવ લિસ્ટ
+    roomRef.child('players').on('value', snapshot => {
+        const list = document.getElementById('lobby-players');
+        list.innerHTML = "";
+        snapshot.forEach(child => {
+            list.innerHTML += `<div class="player-badge">👤 ${child.val().name}</div>`;
         });
-        const d = await res.json();
-        if (d.success) {
-          resBox.innerHTML = `<h4 style="color:#2e7d32;">💡 કૃષિ સલાહ:</h4><p style="white-space: pre-line; margin-top:8px; line-height: 1.6;">${d.data.textAnswer}</p>`;
-          resBox.style.display = 'block';
-        } else {
-          alert(d.error || "માહિતી મળી નથી.");
+    });
+}
+
+// એડમિન PIN સેન્ડ કરે એટલે ગ્લોબલ નોડ પર બ્રોડકાસ્ટ થાય
+function broadcastPin() {
+    db.ref('active_broadcast').set({ pin: currentPin });
+    alert("PIN બધા ગેમર્સની સ્ક્રીન પર મોકલી દેવાયો છે!");
+}
+
+// CSV ફાઈલ નમૂનો
+function downloadSampleCSV() {
+    const csvContent = "\uFEFFQuestion,OptionA,OptionB,OptionC,OptionD,Correct\n" +
+        "\"બક્સરના યુદ્ધ પછી કયા શાસકો સાથે સંધિ થઈ?\",\"અવધના નવાબ અને મુઘલ બાદશાહ\",\"મીરકાસીમ\",\"નિઝામ\",\"સિરાજ-ઉદ-દૌલા\",\"a\"\n" +
+        "\"કાયમી જમાબંધી પદ્ધતિ ક્યારે અમલમાં આવી?\",\"ઈ.સ. 1757\",\"ઈ.સ. 1772\",\"ઈ.સ. 1793\",\"ઈ.સ. 1857\",\"c\"\n" +
+        "\"રૈયતવારી પદ્ધતિના પ્રણેતા કોણ હતા?\",\"હોલ્ટ મેકેન્ઝી\",\"થોમસ મૂનરો\",\"કોર્નવોલિસ\",\"રોબર્ટ ક્લાઇવ\",\"b\"\n";
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "ક્વિઝ_પ્રશ્નો_નમૂનો.csv";
+    link.click();
+}
+
+function handleCSV(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            let parsed = [];
+            results.data.forEach(row => {
+                const keys = Object.keys(row);
+                const getVal = (pattern) => {
+                    const k = keys.find(key => key.trim().toLowerCase().includes(pattern));
+                    return k && row[k] ? row[k].toString().trim() : "";
+                };
+
+                const q = getVal("quest");
+                const a = getVal("optiona") || getVal("a");
+                const b = getVal("optionb") || getVal("b");
+                const c = getVal("optionc") || getVal("c");
+                const d = getVal("optiond") || getVal("d");
+                const correct = (getVal("corr") || "").toLowerCase().trim();
+
+                if (q && a && b && c && d && ['a','b','c','d'].includes(correct)) {
+                    parsed.push({ q, a, b, c, d, correct });
+                }
+            });
+
+            if (parsed.length > 0) {
+                questions = parsed;
+                document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થયા!)`;
+                alert(`${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થઈ ગયા છે.`);
+            } else {
+                alert("CSV ફોર્મેટ યોગ્ય નથી!");
+            }
         }
-      } catch (err) {
-        alert("નેટવર્ક એરર આવી.");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "સલાહ મેળવો 🔍";
-      }
-    }
+    });
+}
 
-    async function analyzeCrop() {
-      if (!base64Image) return alert("કૃપા કરીને પહેલા પાકનો ફોટો પાડો અથવા સિલેક્ટ કરો.");
-      const btn = document.getElementById('analyzeBtn');
-      const resBox = document.getElementById('diseaseResult');
-      btn.disabled = true;
-      btn.innerText = "રોગનું નિદાન થઈ રહ્યું છે...";
-      resBox.style.display = 'none';
+// એડમિન ગેમ શરૂ કરવાનો આદેશ આપે ત્યારે જ ગેમ શરૂ થાય
+function adminStartGameCommand() {
+    document.getElementById('host-lobby').style.display = 'none';
+    document.getElementById('host-game').style.display = 'block';
+    loadHostQuestion(0);
+}
 
-      try {
-        const res = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            type: 'disease',
-            imageBase64: base64Image,
-            query: document.getElementById('diseaseQuery').value
-          })
-        });
-        const d = await res.json();
-        if (d.success) {
-          const info = d.data;
-          resBox.innerHTML = `
-            <h3 style="color:#2e7d32;">🌾 પાક: ${info.crop_name}</h3>
-            <p style="margin-top:6px;"><b>⚠️ સંભવિત રોગ:</b> ${info.disease_name} (તીવ્રતા: ${info.severity})</p>
-            <p style="margin-top:6px;"><b>🔍 મુખ્ય લક્ષણો:</b> ${info.symptoms}</p>
-            <p style="margin-top:6px; color:#c62828;"><b>💊 રાસાયણિક દવા:</b> ${info.chemical_treatment}</p>
-            <p style="margin-top:6px; color:#2e7d32;"><b>🌿 દેશી / જૈવિક ઉપાય:</b> ${info.organic_treatment}</p>
-            <p style="margin-top:6px; color:#e65100;"><b>🛡️ સાવચેતી:</b> ${info.prevention}</p>
-          `;
-          resBox.style.display = 'block';
-        } else {
-          alert(d.error || "નિદાન થઈ શક્યું નથી.");
-        }
-      } catch(err) {
-        alert("કનેક્શન એરર આવી.");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "રોગનું નિદાન કરો 🔬";
-      }
-    }
+function loadHostQuestion(idx) {
+    currentQIdx = idx;
+    const q = questions[idx];
+    document.getElementById('q-counter').innerText = `પ્રશ્ન ${idx + 1} / ${questions.length}`;
+    document.getElementById('q-text').innerText = q.q;
+    document.getElementById('lbl-a').innerText = `▲ ${q.a}`;
+    document.getElementById('lbl-b').innerText = `◆ ${q.b}`;
+    document.getElementById('lbl-c').innerText = `● ${q.c}`;
+    document.getElementById('lbl-d').innerText = `■ ${q.d}`;
+    document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
 
-    window.addEventListener('load', () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => getWeatherData(pos.coords.latitude, pos.coords.longitude),
-          () => getWeatherData(24.36, 71.52),
-          { timeout: 6000 }
-        );
-      } else {
-        getWeatherData(24.36, 71.52);
-      }
+    // Firebase સિંક
+    roomRef.update({
+        state: "question",
+        currentQuestion: idx,
+        correctAnswer: q.correct.toLowerCase().trim(),
+        questionStartTime: Date.now()
     });
 
-    async function getWeatherData(lat, lon) {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,rain,wind_speed_10m`;
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (data.current) {
-          const t = data.current.temperature_2m;
-          const w = data.current.wind_speed_10m;
-          const r = data.current.rain;
-          const h = data.current.relative_humidity_2m;
-
-          document.getElementById('w-temp').innerText = `${t} °C`;
-          document.getElementById('w-wind').innerText = `${w} km/h`;
-          document.getElementById('w-rain').innerText = `${r} mm`;
-          document.getElementById('w-humidity').innerText = `${h}%`;
-          document.getElementById('geo-status').innerText = "હવામાન વિગતો સફળતાપૂર્વક અપડેટ થઈ ગઈ છે.";
-
-          let advice = "હવામાન સામાન્ય છે. નિયમિત ખેતી કાર્યો કરી શકાય છે.";
-          if (w > 16) {
-            advice = "⚠️ પવનની ગતિ વધુ છે (16 km/h થી વધુ), આજના દિવસે પાક પર કોઈ પણ પ્રકારનો દવાનો છંટકાવ ટાળવો, અન્યથા દવા હવામાં ઉડી જશે.";
-          } else if (r > 1) {
-            advice = "🌧️ વરસાદ ચાલુ અથવા ભેજનું પ્રમાણ વધુ છે. પાકને હાલ પિયત આપવાનું મોકૂફ રાખવું.";
-          } else if (t > 38) {
-            advice = "☀️ વધુ ગરમી હોવાથી પિયત સાંજ અથવા વહેલી સવારે જ આપવું.";
-          }
-          document.getElementById('agro-advisory').innerText = advice;
+    timer = 20;
+    document.getElementById('timer-val').innerText = timer;
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timer--;
+        document.getElementById('timer-val').innerText = timer;
+        if (timer <= 0) {
+            clearInterval(timerInterval);
+            timeUpHost();
         }
-      } catch (e) {
-        document.getElementById('geo-status').innerText = "હવામાન લોડ થઈ શક્યું નહીં.";
-      }
+    }, 1000);
+}
+
+function timeUpHost() {
+    const q = questions[currentQIdx];
+    document.getElementById(`lbl-${q.correct.toLowerCase()}`).classList.add('correct-highlight');
+    roomRef.update({ state: "timeup" });
+}
+
+// ૨૦ સેકન્ડ પૂરી ન થઈ હોય તો પણ એડમિન આગળ વધી શકે
+function adminForceNextQuestion() {
+    clearInterval(timerInterval);
+    if (currentQIdx + 1 < questions.length) {
+        document.getElementById('host-leaderboard').style.display = 'none';
+        document.getElementById('host-game').style.display = 'block';
+        loadHostQuestion(currentQIdx + 1);
+    } else {
+        showFinalPodium();
     }
-  </script>
+}
+
+function showScores() {
+    clearInterval(timerInterval);
+    document.getElementById('host-game').style.display = 'none';
+    document.getElementById('host-leaderboard').style.display = 'block';
+
+    roomRef.child('players').once('value', snapshot => {
+        let players = [];
+        snapshot.forEach(c => players.push(c.val()));
+        // સ્કોર મુજબ સોર્ટ
+        players.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+        const list = document.getElementById('scores-list');
+        list.innerHTML = "";
+        players.slice(0, 5).forEach((p, i) => {
+            list.innerHTML += `<div class="score-row"><span>#${i+1} ${p.name}</span><span>${p.score || 0} ગુણ</span></div>`;
+        });
+    });
+}
+
+function showFinalPodium() {
+    document.getElementById('host-leaderboard').style.display = 'none';
+    document.getElementById('host-game').style.display = 'none';
+    document.getElementById('host-podium').style.display = 'block';
+
+    const audio = document.getElementById('sound-win');
+    audio.play().catch(e => console.log(e));
+
+    roomRef.update({ state: "ended" });
+
+    roomRef.child('players').once('value', snapshot => {
+        let players = [];
+        snapshot.forEach(c => players.push(c.val()));
+        players.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+        if(players[0]) {
+            document.getElementById('podium-1-name').innerText = players[0].name;
+            document.getElementById('podium-1-score').innerText = (players[0].score || 0) + " ગુણ";
+        }
+        if(players[1]) {
+            document.getElementById('podium-2-name').innerText = players[1].name;
+            document.getElementById('podium-2-score').innerText = (players[1].score || 0) + " ગુણ";
+        }
+        if(players[2]) {
+            document.getElementById('podium-3-name').innerText = players[2].name;
+            document.getElementById('podium-3-score').innerText = (players[2].score || 0) + " ગુણ";
+        }
+    });
+}
+
+// ======================= ગેમર / પ્લેયર લોજિક =======================
+let playerId = "p_" + Math.random().toString(36).substr(2, 9);
+let playerRoomRef = null;
+let currentScore = 0;
+let hasAnswered = false;
+let currentCorrect = "";
+let qStartTime = 0;
+let lastProcessedQ = -1;
+
+function initPlayer() {
+    document.getElementById('role-select-view').style.display = 'none';
+    document.getElementById('player-view').style.display = 'flex';
+
+    // એડમિન જ્યારે PIN સેન્ડ કરશે ત્યારે સીધો અહીં ઓટોમેટિક આવી જશે!
+    db.ref('active_broadcast').on('value', snap => {
+        if(snap.exists() && snap.val().pin) {
+            document.getElementById('pin-input').value = snap.val().pin;
+        }
+    });
+}
+
+function joinPlayerRoom() {
+    const pin = document.getElementById('pin-input').value.trim();
+    const name = document.getElementById('name-input').value.trim();
+    if (!pin || !name) return alert("PIN અને નામ લખવું જરૂરી છે!");
+
+    playerRoomRef = db.ref('rooms/' + pin);
+
+    playerRoomRef.once('value', snap => {
+        if (!snap.exists()) {
+            alert("રૂમ PIN મળ્યો નથી! એડમિન PIN મોકલે તેની રાહ જુઓ.");
+            return;
+        }
+
+        playerRoomRef.child('players/' + playerId).set({ name: name, score: 0 });
+
+        document.getElementById('player-login-box').style.display = 'none';
+        document.getElementById('player-wait-box').style.display = 'block';
+        document.getElementById('wait-msg').innerText = "એડમિન ગેમ શરૂ કરે તેની રાહ જુઓ...";
+
+        listenPlayerGame();
+    });
+}
+
+function listenPlayerGame() {
+    playerRoomRef.on('value', snap => {
+        const val = snap.val();
+        if (!val) return;
+
+        // પ્રશ્ન મોડ
+        if (val.state === "question") {
+            if (val.currentQuestion !== lastProcessedQ) {
+                lastProcessedQ = val.currentQuestion;
+                hasAnswered = false;
+                currentCorrect = (val.correctAnswer || "").toString().trim().toLowerCase();
+                qStartTime = val.questionStartTime || Date.now();
+
+                document.getElementById('feedback-container').innerHTML = "";
+                document.getElementById('player-wait-box').style.display = 'none';
+                document.getElementById('player-answer-grid').style.display = 'grid';
+            }
+        } 
+        // સમય પૂરો કે એડમિન દ્વારા ફોર્સ નેક્સ્ટ
+        else if (val.state === "timeup") {
+            document.getElementById('player-answer-grid').style.display = 'none';
+            document.getElementById('player-wait-box').style.display = 'block';
+            if (!hasAnswered) {
+                showPlayerFeedback(false, "સમય પૂરો થયો! જવાબ આપ્યો નથી.");
+            }
+            document.getElementById('wait-msg').innerText = "સ્ક્રીન પર પરિણામ જુઓ...";
+        }
+        else if (val.state === "ended") {
+            document.getElementById('player-answer-grid').style.display = 'none';
+            document.getElementById('player-wait-box').style.display = 'block';
+            document.getElementById('wait-msg').innerText = "🎉 ક્વિઝ પૂર્ણ થઈ ગઈ છે! સ્ક્રીન પર વિજેતાઓ જુઓ.";
+        }
+    });
+}
+
+function sendPlayerAnswer(selected) {
+    if (hasAnswered) return;
+    hasAnswered = true;
+
+    // ટચ થતાં જ તરત બટન હટી જશે
+    document.getElementById('player-answer-grid').style.display = 'none';
+    document.getElementById('player-wait-box').style.display = 'block';
+
+    const cleanSelected = selected.toString().trim().toLowerCase();
+    const isCorrect = (cleanSelected === currentCorrect);
+    const responseSec = (Date.now() - qStartTime) / 1000;
+
+    if (isCorrect) {
+        let pts = Math.max(100, Math.round(1000 - (responseSec * 40)));
+        currentScore += pts;
+        playerRoomRef.child('players/' + playerId).update({ score: currentScore });
+        showPlayerFeedback(true, `સાચો જવાબ! 🌟 (+${pts})`);
+    } else {
+        showPlayerFeedback(false, "ખોટો જવાબ! ❌");
+    }
+
+    document.getElementById('my-score').innerText = currentScore;
+    document.getElementById('wait-msg').innerText = "બીજા વિદ્યાર્થીઓના જવાબની રાહ જુઓ...";
+}
+
+function showPlayerFeedback(isCorrect, text) {
+    const box = document.getElementById('feedback-container');
+    box.innerHTML = `<div class="feedback-box" style="background:${isCorrect ? '#2ecc71' : '#e74c3c'}; color:white;">${text}</div>`;
+}
+</script>
 </body>
 </html>
-
