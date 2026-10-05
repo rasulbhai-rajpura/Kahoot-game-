@@ -222,11 +222,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let questions = [
-    { "q": "પૃથ્વીના ગોળા પર વિષુવવૃત્તથી ધ્રુવો તરફ જતાં સમાંતર અક્ષાંશવૃત્તોના પરિઘમાં શું ફેરફાર થાય છે?", "a": "સતત વધારો થાય છે", "b": "અપરિવર્તિત રહે છે", "c": "સતત ઘટાડો થાય છે", "d": "પહેલાં ઘટે પછી વધે", "correct": "c" },
-    { "q": "ગ્રીનિચ મુખ્ય મધ્યરેખા (0° રેખાંશ) પર બપોરના 12:00 વાગ્યા હોય, ત્યારે 60° પૂર્વ રેખાંશ પર સ્થાનિક સમય શું હશે?", "a": "બપોરના 4:00 વાગે", "b": "સવારના 8:00 વાગે", "c": "સાંજના 6:00 વાગે", "d": "બપોરના 2:00 વાગે", "correct": "a" },
-    { "q": "ભારતીય પ્રમાણ સમય રેખા (82.5° પૂર્વ રેખાંશ) નીચેનામાંથી કયા રાજ્યમાંથી પસાર થતી નથી?", "a": "ઉત્તર પ્રદેશ", "b": "છત્તીસગઢ", "c": "તમિલનાડુ", "d": "ઓડિશા", "correct": "c" }
-];
+let questions = [      ];
 
 let currentPin = "";
 let roomRef = null;
@@ -313,9 +309,16 @@ function handleCSV(e) {
 }
 
 function adminStartGameCommand() {
+    function adminStartGameCommand() {
+    if (!questions || questions.length === 0) {
+        alert("⚠ કૃપા કરીને પહેલાં 'Excel (CSV) અપલોડ' બટન પર ક્લિક કરીને ફાઈલ પસંદ કરો!");
+        return;
+    }
     document.getElementById('host-lobby').style.display = 'none';
     document.getElementById('host-game').style.display = 'block';
     loadHostQuestion(0);
+}
+
 }
 
 function loadHostQuestion(idx) {
