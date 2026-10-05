@@ -10,6 +10,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <!-- PapaParse CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<!-- Excel (.xlsx) વાંચવા માટે SheetJS લાઈબ્રેરી -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -103,8 +105,9 @@
             <button class="btn btn-broadcast" onclick="broadcastPin()">📡 પ્લેયર્સને PIN મોકલો</button>
             <br>
             <button class="btn btn-sample" onclick="downloadSampleCSV()">📥 નમૂનાની CSV</button>
-            <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCSV(event)">
-            <button class="btn btn-upload" onclick="document.getElementById('csvFileInput').click()">📁 Excel (CSV) અપલોડ</button>
+            <input type="file" id="csvFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
+<button class="btn btn-upload" onclick="document.getElementById('csvFileInput').click()">📁 Excel ફાઈલ અપલોડ</button>
+
             <div id="q-loaded-count" style="margin-top: 10px; font-weight: bold;">(૩ પ્રશ્નો ડિફોલ્ટ લોડ છે)</div>
         </div>
 
@@ -264,35 +267,41 @@ function downloadSampleCSV() {
     link.click();
 }
 
-function handleCSV(e) {
+function handleExcelUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
             let parsed = [];
-            results.data.forEach(row => {
+            jsonData.forEach(row => {
                 const keys = Object.keys(row);
                 const getVal = (target) => {
-                    const k = keys.find(key => key.trim().toLowerCase() === target.toLowerCase() || key.trim().toLowerCase().includes(target.toLowerCase()));
+                    const k = keys.find(key => key.toString().trim().toLowerCase() === target.toLowerCase() || key.toString().trim().toLowerCase().includes(target.toLowerCase()));
                     return k && row[k] ? row[k].toString().trim() : "";
                 };
 
-                const q = getVal("question") || getVal("quest");
+                const q = getVal("question") || getVal("quest") || getVal("પ્રશ્ન");
                 const a = getVal("answer 1") || getVal("optiona") || row['a'] || row['A'] || "";
                 const b = getVal("answer 2") || getVal("optionb") || row['b'] || row['B'] || "";
                 const c = getVal("answer 3") || getVal("optionc") || row['c'] || row['C'] || "";
                 const d = getVal("answer 4") || getVal("optiond") || row['d'] || row['D'] || "";
-                let correct = (getVal("correct") || "").toLowerCase().trim();
+                let correct = (getVal("correct") || getVal("સાચો") || "").toLowerCase().trim();
 
                 if (correct === "1") correct = "a";
                 if (correct === "2") correct = "b";
                 if (correct === "3") correct = "c";
                 if (correct === "4") correct = "d";
 
-                if (q && a && b && c && d && ['a','b','c','d'].includes(correct)) {
+                if (q && a && b && c && d && ['a', 'b', 'c', 'd'].includes(correct)) {
                     parsed.push({ q, a, b, c, d, correct });
                 }
             });
@@ -300,11 +309,17 @@ function handleCSV(e) {
             if (parsed.length > 0) {
                 questions = parsed;
                 document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થયા!)`;
-                alert(`${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થઈ ગયા છે.`);
+                alert(`શાનદાર! ${questions.length} પ્રશ્નો સફળતાપૂર્વક Excel માંથી લોડ થઈ ગયા છે.`);
             } else {
-                alert("CSV ફોર્મેટ યોગ્ય નથી!");
+                alert("⚠ Excel ફોર્મેટ યોગ્ય નથી! કૃપા કરીને કોલમ (Question, a, b, c, d, Correct Answer) ચકાસો.");
             }
+        } catch (err) {
+            alert("ફાઈલ વાંચવામાં ભૂલ આવી: " + err.message);
         }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
     });
 }
 
