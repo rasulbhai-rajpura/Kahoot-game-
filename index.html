@@ -231,6 +231,16 @@ let roomRef = null;
 let currentQIdx = 0, timer = 30, timerInterval;
 
 function initHost() {
+// એડમિન માટે ગુપ્ત પાસવર્ડ પ્રોટેક્શન
+function initHost() {
+    const adminPass = prompt("🔐 એડમિન પાસવર્ડ દાખલ કરો:");
+    
+    // તમે તમારો મનપસંદ પાસવર્ડ અહીં રાખી શકો છો (હાલમાં '1234' રાખ્યો છે)
+    if (adminPass !== "1234") {
+        alert("❌ ખોટો પાસવર્ડ! માત્ર શિક્ષક જ એડમિન બની શકે છે.");
+        return;
+    }
+
     document.getElementById('role-select-view').style.display = 'none';
     document.getElementById('host-view').style.display = 'block';
 
@@ -238,8 +248,9 @@ function initHost() {
     document.getElementById('room-pin').innerText = currentPin;
     
     roomRef = db.ref('rooms/' + currentPin);
-    roomRef.set({ state: "lobby", currentQuestion: -1 });
+    roomRef.set({ state: "lobby", currentQuestion: -1, broadcasted: false });
 
+    // જોડાયેલા પ્લેયર્સ લાઈવ લિસ્ટ
     roomRef.child('players').on('value', snapshot => {
         const list = document.getElementById('lobby-players');
         list.innerHTML = "";
@@ -248,6 +259,7 @@ function initHost() {
         });
     });
 }
+
 
 function broadcastPin() {
     db.ref('active_broadcast').set({ pin: currentPin });
