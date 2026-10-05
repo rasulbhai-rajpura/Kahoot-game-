@@ -30,6 +30,9 @@
         .btn-role-admin { background: #1368ce; font-size: 22px; padding: 18px 30px; }
         .btn-role-player { background: #e21b3c; font-size: 22px; padding: 18px 30px; }
 
+        /* Admin Password Box Modal */
+        #admin-pass-modal { display: none; margin-top: 20px; background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; }
+
         /* ADMIN / HOST STYLES */
         #host-view { display: none; width: 100%; }
         .pin-box { font-size: 40px; font-weight: bold; background: white; color: #333; padding: 12px 28px; border-radius: 12px; display: inline-block; margin: 15px 0; }
@@ -86,9 +89,17 @@
     <h1 style="font-size:30px;">શ્રી પાનસડા અનુપમ પ્રાથમિક શાળા</h1>
     <h2>તમે કઈ રીતે જોડાવા માંગો છો?</h2>
     <div style="margin-top: 30px;">
-        <button class="btn btn-role-admin" onclick="initHost()">🖥 એડમિન પેનલ (Host)</button>
+        <button class="btn btn-role-admin" onclick="showAdminPasswordBox()">🖥 એડમિન પેનલ (Host)</button>
         <br><br>
         <button class="btn btn-role-player" onclick="initPlayer()">📱 ગેમર / પ્લેયર (Student)</button>
+    </div>
+
+    <!-- એડમિન પાસવર્ડ ઇનપુટ બોક્સ -->
+    <div id="admin-pass-modal">
+        <h3>🔐 એડમિન પાસવર્ડ દાખલ કરો</h3>
+        <input type="password" id="admin-pass-input" placeholder="પાસવર્ડ લખો (દા.ત. 1234)"><br>
+        <button class="btn btn-green" onclick="verifyAdminPassword()">Login</button>
+        <button class="btn" style="background:#777;" onclick="hideAdminPasswordBox()">Cancel</button>
     </div>
 </div>
 
@@ -101,7 +112,6 @@
         <div style="margin: 15px 0;">
             <button class="btn btn-broadcast" onclick="broadcastPin()">📡 પ્લેયર્સને PIN મોકલો</button>
             <br>
-            <!-- Excel અને CSV બંને સપોર્ટ કરતું બટન -->
             <button class="btn" style="background:#00897b;" onclick="downloadSampleExcel()">📥 નમૂનાની Excel ફાઈલ</button>
 
             <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
@@ -227,20 +237,32 @@ let questions = [];
 let currentPin = "";
 let roomRef = null;
 
+// પાસવર્ડ કંટ્રોલ
+function showAdminPasswordBox() {
+    document.getElementById('admin-pass-modal').style.display = 'block';
+    document.getElementById('admin-pass-input').focus();
+}
+
+function hideAdminPasswordBox() {
+    document.getElementById('admin-pass-modal').style.display = 'none';
+    document.getElementById('admin-pass-input').value = "";
+}
+
+function verifyAdminPassword() {
+    const enteredPass = document.getElementById('admin-pass-input').value.trim();
+    if (enteredPass === "1234") {
+        hideAdminPasswordBox();
+        openHostPanel();
+    } else {
+        alert("❌ ખોટો પાસવર્ડ! માત્ર શિક્ષક જ એડમિન બની શકે છે.");
+        document.getElementById('admin-pass-input').value = "";
+    }
+}
+
 // HOST કંટ્રોલ
 let currentQIdx = 0, timer = 30, timerInterval;
 
-function initHost() {
-// એડમિન માટે ગુપ્ત પાસવર્ડ પ્રોટેક્શન
-function initHost() {
-    const adminPass = prompt("🔐 એડમિન પાસવર્ડ દાખલ કરો:");
-    
-    // તમે તમારો મનપસંદ પાસવર્ડ અહીં રાખી શકો છો (હાલમાં '1234' રાખ્યો છે)
-    if (adminPass !== "1234") {
-        alert("❌ ખોટો પાસવર્ડ! માત્ર શિક્ષક જ એડમિન બની શકે છે.");
-        return;
-    }
-
+function openHostPanel() {
     document.getElementById('role-select-view').style.display = 'none';
     document.getElementById('host-view').style.display = 'block';
 
@@ -248,9 +270,8 @@ function initHost() {
     document.getElementById('room-pin').innerText = currentPin;
     
     roomRef = db.ref('rooms/' + currentPin);
-    roomRef.set({ state: "lobby", currentQuestion: -1, broadcasted: false });
+    roomRef.set({ state: "lobby", currentQuestion: -1 });
 
-    // જોડાયેલા પ્લેયર્સ લાઈવ લિસ્ટ
     roomRef.child('players').on('value', snapshot => {
         const list = document.getElementById('lobby-players');
         list.innerHTML = "";
@@ -260,13 +281,11 @@ function initHost() {
     });
 }
 
-
 function broadcastPin() {
     db.ref('active_broadcast').set({ pin: currentPin });
     alert("PIN બધા ગેમર્સની સ્ક્રીન પર મોકલી દેવાયો છે!");
 }
 
-// નમૂનાની તૈયાર Excel (.xlsx) ફાઈલ ડાઉનલોડ કરવાનું ફંક્શન
 function downloadSampleExcel() {
     try {
         const sampleData = [
@@ -318,7 +337,6 @@ function downloadSampleExcel() {
     }
 }
 
-// Excel (.xlsx / .xls) અને CSV વાંચવાનું ફંક્શન
 function handleExcelUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
