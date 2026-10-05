@@ -102,7 +102,7 @@
             <button class="btn btn-broadcast" onclick="broadcastPin()">📡 પ્લેયર્સને PIN મોકલો</button>
             <br>
             <!-- Excel અને CSV બંને સપોર્ટ કરતું બટન -->
-<button class="btn" style="background:#00897b;" onclick="downloadSampleExcel()">📥 નમૂનાની Excel ફાઈલ</button>
+            <button class="btn" style="background:#00897b;" onclick="downloadSampleExcel()">📥 નમૂનાની Excel ફાઈલ</button>
 
             <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
             <button class="btn btn-upload" onclick="document.getElementById('excelFileInput').click()">📁 Excel / CSV ફાઈલ અપલોડ</button>
@@ -250,7 +250,11 @@ function initHost() {
 }
 
 function broadcastPin() {
-    // નમૂનાની તૈયાર Excel (.xlsx) ફાઈલ ડાઉનલોડ કરવાનું ફંક્શન
+    db.ref('active_broadcast').set({ pin: currentPin });
+    alert("PIN બધા ગેમર્સની સ્ક્રીન પર મોકલી દેવાયો છે!");
+}
+
+// નમૂનાની તૈયાર Excel (.xlsx) ફાઈલ ડાઉનલોડ કરવાનું ફંક્શન
 function downloadSampleExcel() {
     try {
         const sampleData = [
@@ -300,21 +304,6 @@ function downloadSampleExcel() {
     } catch (err) {
         alert("ડાઉનલોડમાં સમસ્યા આવી: " + err.message);
     }
-}
-
-    ];
-
-    // SheetJS ની મદદથી Excel ફાઈલ બનાવવી
-    const ws = XLSX.utils.json_to_sheet(sampleData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Questions");
-
-    // ફાઈલ ડાઉનલોડ કરવી
-    XLSX.writeFile(wb, "ક્વિઝ_નમૂનાની_ફાઈલ.xlsx");
-}
-    
-    db.ref('active_broadcast').set({ pin: currentPin });
-    alert("PIN બધા ગેમર્સની સ્ક્રીન પર મોકલી દેવાયો છે!");
 }
 
 // Excel (.xlsx / .xls) અને CSV વાંચવાનું ફંક્શન
