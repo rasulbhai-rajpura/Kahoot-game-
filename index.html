@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kahoot Live Quiz - પૂર્ણ એડમિન કંટ્રોલ</title>
+    <title>Kahoot Live Quiz - સંપૂર્ણ પ્રશ્ન અને ઓપ્શન સાથે</title>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -15,14 +15,13 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #46178f; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         
-        .container { width: 90%; max-width: 850px; padding: 20px; margin: auto; }
+        .container { width: 92%; max-width: 850px; padding: 15px; margin: auto; }
         .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 6px; transition: 0.2s; }
         .btn:active { transform: scale(0.96); }
         .btn-green { background: #26890c; }
         .btn-upload { background: #f39c12; }
         .btn-sample { background: #00897b; }
         .btn-broadcast { background: #e91e63; font-size: 20px; padding: 14px 28px; }
-        .btn-danger { background: #d32f2f; }
 
         input { width: 100%; max-width: 320px; padding: 14px; margin-bottom: 12px; font-size: 18px; border: 2px solid #ccc; border-radius: 8px; text-align: center; outline: none; }
 
@@ -34,13 +33,13 @@
         /* ADMIN / HOST STYLES */
         #host-view { display: none; width: 100%; }
         .pin-box { font-size: 40px; font-weight: bold; background: white; color: #333; padding: 12px 28px; border-radius: 12px; display: inline-block; margin: 15px 0; }
-        .players-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; margin-top: 15px; }
+        .players-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 50px; margin-top: 15px; }
         .player-badge { background: rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-size: 18px; }
         
         .admin-controls { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .question-card { background: white; color: #222; padding: 25px; border-radius: 15px; font-size: 24px; font-weight: bold; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .question-card { background: white; color: #222; padding: 22px; border-radius: 15px; font-size: 22px; font-weight: bold; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: left; }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .opt { padding: 20px; font-size: 20px; font-weight: bold; color: white; border-radius: 10px; text-align: left; }
+        .opt { padding: 18px; font-size: 19px; font-weight: bold; color: white; border-radius: 10px; text-align: left; }
         .opt-a { background: #e21b3c; }
         .opt-b { background: #1368ce; }
         .opt-c { background: #d89e00; }
@@ -51,7 +50,7 @@
         
         /* Podium Styles */
         .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 15px; height: 320px; margin: 30px auto; max-width: 650px; }
-        .podium-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 170px; border-radius: 15px 15px 0 0; color: white; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+        .podium-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 170px; border-radius: 15px 15px 0 0; color: white; font-weight: bold; }
         .p-gold { background: linear-gradient(180deg, #ffd700, #b8860b); height: 260px; order: 2; }
         .p-silver { background: linear-gradient(180deg, #e0e0e0, #757575); height: 200px; order: 1; }
         .p-bronze { background: linear-gradient(180deg, #cd7f32, #8b4513); height: 150px; order: 3; }
@@ -59,15 +58,23 @@
         .p-name { font-size: 18px; background: rgba(0,0,0,0.4); width: 100%; padding: 6px 0; }
         .p-score { font-size: 15px; margin: 8px 0; }
 
-        /* PLAYER STYLES */
-        #player-view { display: none; width: 100vw; height: 100vh; background: #f0f2f5; color: #333; }
-        #player-login-box { margin: auto; padding: 20px; width: 90%; max-width: 320px; }
-        #player-wait-box { display: none; margin: auto; padding: 20px; text-align: center; }
-        .feedback-box { font-size: 24px; font-weight: bold; padding: 18px; border-radius: 12px; margin-bottom: 15px; }
+        /* PLAYER STYLES - મોબાઈલ સ્ક્રીન માટે */
+        #player-view { display: none; width: 100vw; min-height: 100vh; background: #f4f6f9; color: #333; flex-direction: column; align-items: center; justify-content: flex-start; padding: 15px; }
+        #player-login-box { margin: auto; padding: 20px; width: 100%; max-width: 340px; }
+        #player-wait-box { display: none; margin: auto; padding: 25px 15px; text-align: center; width: 100%; max-width: 480px; }
+        .feedback-box { font-size: 22px; font-weight: bold; padding: 18px; border-radius: 12px; margin-bottom: 15px; }
         
-        #player-answer-grid { display: none; width: 100vw; height: 100vh; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; padding: 12px; }
-        .k-btn { border: none; border-radius: 15px; font-size: 65px; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .k-btn:active { transform: scale(0.92); filter: brightness(0.8); }
+        /* વિદ્યાર્થીની સ્ક્રીન પર દેખાતું ક્વેશ્ચન બોક્સ */
+        #player-question-container { display: none; width: 100%; max-width: 550px; margin: 10px auto; }
+        .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; color: #555; }
+        .player-q-card { background: white; color: #111; padding: 18px 20px; border-radius: 14px; font-size: 19px; font-weight: bold; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: left; line-height: 1.45; border-left: 6px solid #46178f; }
+        
+        .player-opt-btn { width: 100%; border: none; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; font-size: 18px; font-weight: bold; color: white; display: flex; align-items: center; text-align: left; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: 0.15s; line-height: 1.35; }
+        .player-opt-btn:active { transform: scale(0.97); }
+        .player-opt-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+        .shape-badge { font-size: 22px; margin-right: 14px; flex-shrink: 0; background: rgba(0,0,0,0.2); width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; }
+        .opt-text { flex-grow: 1; }
+        
         .score-pill { background: #333; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 18px; display: inline-block; margin-top: 15px; }
     </style>
 </head>
@@ -77,7 +84,7 @@
 
 <!-- ૦. મુખ્ય સ્ક્રીન -->
 <div id="role-select-view" class="container">
-    <h1 style="font-size:32px;">શ્રી પાનસડા અનુપમ પ્રાથમિક શાળા</h1>
+    <h1 style="font-size:30px;">શ્રી પાનસડા અનુપમ પ્રાથમિક શાળા</h1>
     <h2>તમે કઈ રીતે જોડાવા માંગો છો?</h2>
     <div style="margin-top: 30px;">
         <button class="btn btn-role-admin" onclick="initHost()">🖥 એડમિન પેનલ (Host)</button>
@@ -106,11 +113,11 @@
         <button class="btn btn-green" style="font-size:24px; padding:15px 35px;" onclick="adminStartGameCommand()">▶ ગેમ શરૂ કરો (Start Game)</button>
     </div>
 
-    <!-- પ્રશ્ન સ્ક્રીન -->
+    <!-- એડમિન પ્રશ્ન સ્ક્રીન -->
     <div class="container" id="host-game" style="display:none;">
         <div style="display:flex; justify-content:space-between; font-size:22px; margin-bottom:10px;">
             <span id="q-counter">પ્રશ્ન ૧</span>
-            <span>⏱ સમય: <span id="timer-val" style="color:#ffeb3b; font-weight:bold;">20</span> સેકન્ડ</span>
+            <span>⏱ સમય: <span id="timer-val" style="color:#ffeb3b; font-weight:bold;">30</span> સેકન્ડ</span>
         </div>
         <div class="question-card" id="q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
         <div class="options-grid">
@@ -134,7 +141,7 @@
         <button class="btn btn-green" style="font-size:20px;" onclick="adminForceNextQuestion()">આગળનો પ્રશ્ન ➡</button>
     </div>
 
-    <!-- આખરી પોડિયમ -->
+    <!-- વિજેતાઓ -->
     <div class="container" id="host-podium" style="display:none;">
         <h1 style="font-size:36px; color:#ffd700;">🎉 ક્વિઝ વિજેતાઓ 🎉</h1>
         <div class="podium-container">
@@ -162,11 +169,11 @@
     </div>
 </div>
 
-<!-- ૨. પ્લેયર / ગેમર ઇન્ટરફેસ -->
+<!-- ૨. પ્લેયર / ગેમર ઇન્ટરફેસ (વિદ્યાર્થીનો મોબાઈલ) -->
 <div id="player-view">
     <div id="player-login-box">
-        <h2 style="color:#333;">જોડાવો ક્વિઝમાં</h2>
-        <input type="number" id="pin-input" placeholder="ગેમ PIN (ઓટો આવશે)">
+        <h2 style="color:#333; margin-top: 40px;">જોડાવો ક્વિઝમાં</h2>
+        <input type="number" id="pin-input" placeholder="ગેમ PIN">
         <input type="text" id="name-input" placeholder="તમારું નામ લખો">
         <button class="btn btn-green" id="btn-enter" style="width:100%;" onclick="joinPlayerRoom()">જોડાઓ (Enter)</button>
     </div>
@@ -177,16 +184,36 @@
         <div class="score-pill">તમારો સ્કોર: <span id="my-score">0</span></div>
     </div>
 
-    <div id="player-answer-grid">
-        <button type="button" class="k-btn opt-a" onpointerdown="sendPlayerAnswer('a')">▲</button>
-        <button type="button" class="k-btn opt-b" onpointerdown="sendPlayerAnswer('b')">◆</button>
-        <button type="button" class="k-btn opt-c" onpointerdown="sendPlayerAnswer('c')">●</button>
-        <button type="button" class="k-btn opt-d" onpointerdown="sendPlayerAnswer('d')">■</button>
+    <!-- પ્રશ્ન અને ઓપ્શન દર્શાવતું કન્ટેનર -->
+    <div id="player-question-container">
+        <div class="player-header">
+            <span id="player-q-num">પ્રશ્ન ૧</span>
+            <span class="score-pill" style="margin:0; padding:4px 14px; font-size:14px;">સ્કોર: <span id="player-live-score">0</span></span>
+        </div>
+        <div class="player-q-card" id="player-q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
+        <div>
+            <button type="button" class="player-opt-btn opt-a" onclick="sendPlayerAnswer('a')">
+                <span class="shape-badge">A</span>
+                <span class="opt-text" id="player-lbl-a">ઓપ્શન A</span>
+            </button>
+            <button type="button" class="player-opt-btn opt-b" onclick="sendPlayerAnswer('b')">
+                <span class="shape-badge">B</span>
+                <span class="opt-text" id="player-lbl-b">ઓપ્શન B</span>
+            </button>
+            <button type="button" class="player-opt-btn opt-c" onclick="sendPlayerAnswer('c')">
+                <span class="shape-badge">C</span>
+                <span class="opt-text" id="player-lbl-c">ઓપ્શન C</span>
+            </button>
+            <button type="button" class="player-opt-btn opt-d" onclick="sendPlayerAnswer('d')">
+                <span class="shape-badge">D</span>
+                <span class="opt-text" id="player-lbl-d">ઓપ્શન D</span>
+            </button>
+        </div>
     </div>
 </div>
 
 <script>
-// --- ૧. Firebase કન્ફિગરેશન (સુધારેલું) ---
+// Firebase કન્ફિગરેશન
 const firebaseConfig = {
     apiKey: "AIzaSyAfd9LgR1le8ggiia7DFbz3MgzeKpj1AvA",
     databaseURL: "https://kahoot-game-2ad7e-default-rtdb.firebaseio.com",
@@ -196,16 +223,16 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let questions = [
-    { "q": "બક્સરના યુદ્ધમાં વિજય મેળવ્યા બાદ ક્લાઇવે કયા શાસકો સાથે સંધિ કરી હતી?", "a": "અવધના નવાબ અને મુઘલ બાદશાહ", "b": "મીરકાસીમ અને મરાઠા શાસક", "c": "નિઝામ અને ટીપુ સુલતાન", "d": "બંગાળના નવાબ અને ફ્રેન્ચો", "correct": "a" },
-    { "q": "કાયમી જમાબંધી મહેસૂલ પદ્ધતિ ભારતમાં કયા વર્ષમાં દાખલ કરવામાં આવી હતી?", "a": "ઈ.સ. 1757", "b": "ઈ.સ. 1772", "c": "ઈ.સ. 1793", "d": "ઈ.સ. 1857", "correct": "c" },
-    { "q": "રૈયતવારી પદ્ધતિના પ્રણેતા કોણ હતા?", "a": "હોલ્ટ મેકેન્ઝી", "b": "થોમસ મૂનરો", "c": "કોર્નવોલિસ", "d": "રોબર્ટ ક્લાઇવ", "correct": "b" }
+    { "q": "પૃથ્વીના ગોળા પર વિષુવવૃત્તથી ધ્રુવો તરફ જતાં સમાંતર અક્ષાંશવૃત્તોના પરિઘમાં શું ફેરફાર થાય છે?", "a": "સતત વધારો થાય છે", "b": "અપરિવર્તિત રહે છે", "c": "સતત ઘટાડો થાય છે", "d": "પહેલાં ઘટે પછી વધે", "correct": "c" },
+    { "q": "ગ્રીનિચ મુખ્ય મધ્યરેખા (0° રેખાંશ) પર બપોરના 12:00 વાગ્યા હોય, ત્યારે 60° પૂર્વ રેખાંશ પર સ્થાનિક સમય શું હશે?", "a": "બપોરના 4:00 વાગે", "b": "સવારના 8:00 વાગે", "c": "સાંજના 6:00 વાગે", "d": "બપોરના 2:00 વાગે", "correct": "a" },
+    { "q": "ભારતીય પ્રમાણ સમય રેખા (82.5° પૂર્વ રેખાંશ) નીચેનામાંથી કયા રાજ્યમાંથી પસાર થતી નથી?", "a": "ઉત્તર પ્રદેશ", "b": "છત્તીસગઢ", "c": "તમિલનાડુ", "d": "ઓડિશા", "correct": "c" }
 ];
 
 let currentPin = "";
 let roomRef = null;
 
-// ======================= એડમિન (HOST) લોજિક =======================
-let currentQIdx = 0, timer = 20, timerInterval;
+// HOST
+let currentQIdx = 0, timer = 30, timerInterval;
 
 function initHost() {
     document.getElementById('role-select-view').style.display = 'none';
@@ -215,9 +242,8 @@ function initHost() {
     document.getElementById('room-pin').innerText = currentPin;
     
     roomRef = db.ref('rooms/' + currentPin);
-    roomRef.set({ state: "lobby", currentQuestion: -1, broadcasted: false });
+    roomRef.set({ state: "lobby", currentQuestion: -1 });
 
-    // જોડાયેલા પ્લેયર્સ લાઈવ લિસ્ટ
     roomRef.child('players').on('value', snapshot => {
         const list = document.getElementById('lobby-players');
         list.innerHTML = "";
@@ -234,14 +260,11 @@ function broadcastPin() {
 
 function downloadSampleCSV() {
     const csvContent = "\uFEFFQuestion,a,b,c,d,Correct Answer\n" +
-        "\"બક્સરના યુદ્ધ પછી કયા શાસકો સાથે સંધિ થઈ?\",\"અવધના નવાબ અને મુઘલ બાદશાહ\",\"મીરકાસીમ\",\"નિઝામ\",\"સિરાજ-ઉદ-દૌલા\",\"a\"\n" +
-        "\"કાયમી જમાબંધી પદ્ધતિ ક્યારે અમલમાં આવી?\",\"ઈ.સ. 1757\",\"ઈ.સ. 1772\",\"ઈ.સ. 1793\",\"ઈ.સ. 1857\",\"c\"\n" +
-        "\"રૈયતવારી પદ્ધતિના પ્રણેતા કોણ હતા?\",\"હોલ્ટ મેકેન્ઝી\",\"થોમસ મૂનરો\",\"કોર્નવોલિસ\",\"રોબર્ટ ક્લાઇવ\",\"b\"\n";
-    
+        "\"પૃથ્વી પર સૌથી મોટું અક્ષાંશવૃત્ત કયું છે?\",\"કર્કવૃત્ત\",\"વિષુવવૃત્ત\",\"મકરવૃત્ત\",\"ધ્રુવવૃત્ત\",\"b\"\n";
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "ક્વિઝ_પ્રશ્નો_નમૂનો.csv";
+    link.download = "quiz_sample.csv";
     link.click();
 }
 
@@ -268,7 +291,6 @@ function handleCSV(e) {
                 const d = getVal("answer 4") || getVal("optiond") || row['d'] || row['D'] || "";
                 let correct = (getVal("correct") || "").toLowerCase().trim();
 
-                // જો સાચો જવાબ નંબર સ્વરૂપે હોય (1, 2, 3, 4) તો તેને a, b, c, d માં કન્વર્ટ કરો
                 if (correct === "1") correct = "a";
                 if (correct === "2") correct = "b";
                 if (correct === "3") correct = "c";
@@ -284,7 +306,7 @@ function handleCSV(e) {
                 document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થયા!)`;
                 alert(`${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થઈ ગયા છે.`);
             } else {
-                alert("CSV ફોર્મેટ યોગ્ય નથી! મહેરબાની કરીને પ્રશ્નો અને વિકલ્પો ચકાસો.");
+                alert("CSV ફોર્મેટ યોગ્ય નથી!");
             }
         }
     });
@@ -307,14 +329,17 @@ function loadHostQuestion(idx) {
     document.getElementById('lbl-d').innerText = `■ ${q.d}`;
     document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
 
+    // Firebase પર પ્રશ્ન અને ઓપ્શન્સ પુશ કરવા
     roomRef.update({
         state: "question",
         currentQuestion: idx,
+        questionText: q.q,
+        options: { a: q.a, b: q.b, c: q.c, d: q.d },
         correctAnswer: q.correct.toLowerCase().trim(),
         questionStartTime: Date.now()
     });
 
-    timer = 20;
+    timer = 30;
     document.getElementById('timer-val').innerText = timer;
     clearInterval(timerInterval);
     timerInterval = setInterval(() => {
@@ -392,7 +417,7 @@ function showFinalPodium() {
     });
 }
 
-// ======================= ગેમર / પ્લેયર લોજિક =======================
+// PLAYER
 let playerId = "p_" + Math.random().toString(36).substr(2, 9);
 let playerRoomRef = null;
 let currentScore = 0;
@@ -427,7 +452,7 @@ function joinPlayerRoom() {
         if (!snap.exists()) {
             enterBtn.innerText = "જોડાઓ (Enter)";
             enterBtn.disabled = false;
-            return alert("રૂમ PIN મળ્યો નથી! તપાસો કે એડમિને પેનલ ઓપન કરી છે કે નહીં.");
+            return alert("રૂમ PIN મળ્યો નથી! એડમિન પેનલ ચાલુ છે કે નહીં તે ચકાસો.");
         }
 
         playerRoomRef.child('players/' + playerId).set({ name: name, score: 0 }).then(() => {
@@ -455,13 +480,28 @@ function listenPlayerGame() {
                 currentCorrect = (val.correctAnswer || "").toString().trim().toLowerCase();
                 qStartTime = val.questionStartTime || Date.now();
 
-                document.getElementById('feedback-container').innerHTML = "";
+                // પ્લેયર બટન સક્રિય કરવા
+                document.querySelectorAll('.player-opt-btn').forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
+
+                // મોબાઇલમાં પ્રશ્ન અને ઓપ્શન્સ લોડ કરવા
+                document.getElementById('player-q-num').innerText = `પ્રશ્ન ${val.currentQuestion + 1}`;
+                document.getElementById('player-q-text').innerText = val.questionText || "પ્રશ્ન લોડ થઈ રહ્યો છે...";
+                if (val.options) {
+                    document.getElementById('player-lbl-a').innerText = val.options.a || "";
+                    document.getElementById('player-lbl-b').innerText = val.options.b || "";
+                    document.getElementById('player-lbl-c').innerText = val.options.c || "";
+                    document.getElementById('player-lbl-d').innerText = val.options.d || "";
+                }
+
                 document.getElementById('player-wait-box').style.display = 'none';
-                document.getElementById('player-answer-grid').style.display = 'grid';
+                document.getElementById('player-question-container').style.display = 'block';
             }
         } 
         else if (val.state === "timeup") {
-            document.getElementById('player-answer-grid').style.display = 'none';
+            document.getElementById('player-question-container').style.display = 'none';
             document.getElementById('player-wait-box').style.display = 'block';
             if (!hasAnswered) {
                 showPlayerFeedback(false, "સમય પૂરો થયો! જવાબ આપ્યો નથી.");
@@ -469,9 +509,9 @@ function listenPlayerGame() {
             document.getElementById('wait-msg').innerText = "સ્ક્રીન પર પરિણામ જુઓ...";
         }
         else if (val.state === "ended") {
-            document.getElementById('player-answer-grid').style.display = 'none';
+            document.getElementById('player-question-container').style.display = 'none';
             document.getElementById('player-wait-box').style.display = 'block';
-            document.getElementById('wait-msg').innerText = "🎉 ક્વિઝ પૂર્ણ થઈ ગઈ છે! સ્ક્રીન પર વિજેતાઓ જુઓ.";
+            document.getElementById('wait-msg').innerText = "🎉 ક્વિઝ પૂર્ણ થઈ ગઈ છે! વિજેતાઓ જુઓ.";
         }
     });
 }
@@ -480,15 +520,17 @@ function sendPlayerAnswer(selected) {
     if (hasAnswered) return;
     hasAnswered = true;
 
-    document.getElementById('player-answer-grid').style.display = 'none';
-    document.getElementById('player-wait-box').style.display = 'block';
+    // બધા ઓપ્શન્સ ડિસેબલ કરી દેવા જેથી બીજી વાર ક્લિક ન થાય
+    document.querySelectorAll('.player-opt-btn').forEach(btn => {
+        btn.disabled = true;
+    });
 
     const cleanSelected = selected.toString().trim().toLowerCase();
     const isCorrect = (cleanSelected === currentCorrect);
     const responseSec = (Date.now() - qStartTime) / 1000;
 
     if (isCorrect) {
-        let pts = Math.max(100, Math.round(1000 - (responseSec * 40)));
+        let pts = Math.max(100, Math.round(1000 - (responseSec * 25)));
         currentScore += pts;
         playerRoomRef.child('players/' + playerId).update({ score: currentScore });
         showPlayerFeedback(true, `સાચો જવાબ! 🌟 (+${pts})`);
@@ -497,7 +539,14 @@ function sendPlayerAnswer(selected) {
     }
 
     document.getElementById('my-score').innerText = currentScore;
-    document.getElementById('wait-msg').innerText = "બીજા વિદ્યાર્થીઓના જવાબની રાહ જુઓ...";
+    document.getElementById('player-live-score').innerText = currentScore;
+
+    // ૧ સેકન્ડ પછી વેઇટિંગ સ્ક્રીન બતાવી દેવી
+    setTimeout(() => {
+        document.getElementById('player-question-container').style.display = 'none';
+        document.getElementById('player-wait-box').style.display = 'block';
+        document.getElementById('wait-msg').innerText = "બીજા વિદ્યાર્થીઓના જવાબની રાહ જુઓ...";
+    }, 1200);
 }
 
 function showPlayerFeedback(isCorrect, text) {
