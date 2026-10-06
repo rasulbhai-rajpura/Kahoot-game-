@@ -97,7 +97,7 @@
     <!-- એડમિન પાસવર્ડ ઇનપુટ બોક્સ -->
     <div id="admin-pass-modal">
         <h3>🔐 એડમિન પાસવર્ડ દાખલ કરો</h3>
-        <input type="password" id="admin-pass-input" placeholder="પાસવર્ડ લખો "><br>
+        <input type="password" id="admin-pass-input" placeholder="પાસવર્ડ દાખલ કરો"><br>
         <button class="btn btn-green" onclick="verifyAdminPassword()">Login</button>
         <button class="btn" style="background:#777;" onclick="hideAdminPasswordBox()">Cancel</button>
     </div>
@@ -115,8 +115,8 @@
             <button class="btn" style="background:#00897b;" onclick="downloadSampleExcel()">📥 નમૂનાની Excel ફાઈલ</button>
 
             <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
-            <button class="btn btn-upload" onclick="document.getElementById('excelFileInput').click()">📁 Excel / CSV ફાઈલ અપલોડ</button>
-            <div id="q-loaded-count" style="margin-top: 10px; font-weight: bold; color:#ffeb3b;">(કૃપા કરીને પ્રશ્નોની Excel ફાઈલ અપલોડ કરો)</div>
+            <button class="btn btn-upload" onclick="document.getElementById('excelFileInput').click()">📁 નવી Excel / CSV અપલોડ</button>
+            <div id="q-loaded-count" style="margin-top: 10px; font-weight: bold; color:#ffeb3b;">(પ્રશ્નો ચકાસી રહ્યા છીએ...)</div>
         </div>
 
         <div class="players-list" id="lobby-players"></div>
@@ -250,7 +250,7 @@ function hideAdminPasswordBox() {
 
 function verifyAdminPassword() {
     const enteredPass = document.getElementById('admin-pass-input').value.trim();
-    if (enteredPass === "1979") {
+    if (enteredPass === "1234") {
         hideAdminPasswordBox();
         openHostPanel();
     } else {
@@ -271,6 +271,18 @@ function openHostPanel() {
     
     roomRef = db.ref('rooms/' + currentPin);
     roomRef.set({ state: "lobby", currentQuestion: -1 });
+
+    // 🟢 Firebase માંથી અગાઉથી સેવ થયેલા પ્રશ્નો ઓટોમેટિક લોડ કરો
+    db.ref('saved_quiz_questions').once('value', snapshot => {
+        if (snapshot.exists()) {
+            questions = snapshot.val();
+            document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો અગાઉથી સેવ થયેલા છે!)`;
+            document.getElementById('q-loaded-count').style.color = "#4caf50";
+        } else {
+            document.getElementById('q-loaded-count').innerText = "(કૃપા કરીને પ્રશ્નોની Excel ફાઈલ અપલોડ કરો)";
+            document.getElementById('q-loaded-count').style.color = "#ffeb3b";
+        }
+    });
 
     roomRef.child('players').on('value', snapshot => {
         const list = document.getElementById('lobby-players');
@@ -378,8 +390,13 @@ function handleExcelUpload(e) {
 
             if (parsed.length > 0) {
                 questions = parsed;
-                document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થયા!)`;
-                alert(`શાનદાર! ${questions.length} પ્રશ્નો સફળતાપૂર્વક Excel માંથી લોડ થઈ ગયા છે.`);
+                
+                // 🟢 Firebase માં પ્રશ્નો કાયમી સેવ કરી દીધા
+                db.ref('saved_quiz_questions').set(parsed);
+
+                document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ અને સેવ થયા!)`;
+                document.getElementById('q-loaded-count').style.color = "#4caf50";
+                alert(`શાનદાર! ${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થઈ ગયા છે અને ભવિષ્ય માટે સ્ટોર પણ થઈ ગયા છે.`);
             } else {
                 alert("⚠ ફાઇલ યોગ્ય રીતે વાંચી શકાઈ નથી! કૃપા કરીને કોલમ (Question, a, b, c, d, Correct Answer) ચકાસો.");
             }
@@ -392,7 +409,7 @@ function handleExcelUpload(e) {
 
 function adminStartGameCommand() {
     if (!questions || questions.length === 0) {
-        alert("⚠ કૃપા કરીને પહેલાં 'Excel / CSV ફાઈલ અપલોડ' બટન પર ક્લિક કરીને ફાઈલ પસંદ કરો!");
+        alert("⚠ હાલ કોઈ પ્રશ્નો સેવ નથી! કૃપા કરીને 'નવી Excel / CSV અપલોડ' બટન પરથી ફાઈલ અપલોડ કરો.");
         return;
     }
     document.getElementById('host-lobby').style.display = 'none';
