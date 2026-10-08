@@ -595,32 +595,32 @@ function openHostPanel() {
   document.getElementById('room-pin').innerText = currentPin;
 
   roomRef = db.ref('rooms/' + currentPin);
+
+  const expiresAt = Date.now() + (3 * 60 * 60 * 1000);
+
   roomRef.set({
     state: "lobby",
     currentQuestion: -1,
     hostUid: currentUid,
-    createdAt: firebase.database.ServerValue.TIMESTAMP
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
+    expiresAt: expiresAt
   });
 
-  setTimeout(() => {
-    if (roomRef) roomRef.remove();
-  }, 3 * 60 * 60 * 1000);
+  /*
+   * Room-specific questions.
+   * જૂના global saved_quiz_questions પરથી questions
+   * લોડ નહીં થાય.
+   */
+  questions = [];
 
-  db.ref('saved_quiz_questions').once('value', snap => {
-    const el = document.getElementById('q-loaded-count');
-    if (snap.exists()) {
-      questions = snap.val();
-      el.innerText = `✅ ${questions.length} પ્રશ્નો લોડ`;
-      el.className = "q-count-badge success";
-    } else {
-      el.innerText = `⚠ Excel અપલોડ કરો`;
-      el.className = "q-count-badge loading";
-    }
-  });
+  const el = document.getElementById('q-loaded-count');
+  el.innerText = `⚠ Excel અપલોડ કરો`;
+  el.className = "q-count-badge loading";
 
   roomRef.child('players').on('value', snap => {
     const list = document.getElementById('lobby-players');
     list.innerHTML = "";
+
     snap.forEach(c => {
       const p = c.val();
       list.innerHTML += `<div class="player-badge">👤 ${sanitize(p.name)}</div>`;
@@ -628,7 +628,9 @@ function openHostPanel() {
   });
 
   if (hostPlayersRef) hostPlayersRef.off();
+
   hostPlayersRef = roomRef.child('players');
+
   hostPlayersRef.on('value', () => {
     renderLivePlayersStatus();
   });
@@ -654,56 +656,170 @@ function downloadSampleExcel() {
 function handleExcelUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
+
+  if (!currentPin || !roomRef) {
+    showToast("⚠ પહેલા Host Room બનાવો!", 'error');
+    return;
+  }
+
   const reader = new FileReader();
+
   reader.onload = evt => {
     try {
       const data = new Uint8Array(evt.target.result);
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
+
       const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
 
       let parsed = [];
+
       json.forEach(row => {
         const keys = Object.keys(row);
+
         const get = t => {
-          const k = keys.find(k => k.toString().trim().toLowerCase().includes(t.toLowerCase()));
-          return k && row[k] ? row[k].toString().trim() : "";
+          const k = keys.find(k =>
+            k.toString().trim().toLowerCase().includes(t.toLowerCase())
+          );
+
+          return k && row[k]
+            ? row[k].toString().trim()
+            : "";
         };
+
         const q = get("question") || get("પ્રશ્ન");
-        const a = row['a'] || row['A'] || get("optiona") || "";
-        const b = row['b'] || row['B'] || get("optionb") || "";
-        const c = row['c'] || row['C'] || get("optionc") || "";
-        const d = row['d'] || row['D'] || get("optiond") || "";
-        let corr = (get("correct") || get("સાચો") || "").toLowerCase().trim();
+
+        const a =
+          row['a'] ||
+          row['A'] ||
+          get("optiona") ||
+          "";
+
+        const b =
+          row['b'] ||
+          row['B'] ||
+          get("optionb") ||
+          "";
+
+        const c =
+          row['c'] ||
+          row['C'] ||
+          get("optionc") ||
+          "";
+
+        const d =
+          row['d'] ||
+          row['D'] ||
+          get("optiond") ||
+          "";
+
+        let corr =
+          (get("correct") ||
+           get("સાચો") ||
+           "")
+          .toLowerCase()
+          .trim();
+
         if (corr === "1") corr = "a";
         if (corr === "2") corr = "b";
         if (corr === "3") corr = "c";
         if (corr === "4") corr = "d";
 
-        if (q && a && b && c && d && ['a','b','c','d'].includes(corr)) {
-          parsed.push({ q, a, b, c, d, correct: corr });
+        if (
+          q &&
+          a &&
+          b &&
+          c &&
+          d &&
+          ['a', 'b', 'c', 'd'].includes(corr)
+        ) {
+          parsed.push({
+            q: sanitize(q, 500),
+            a: sanitize(a, 300),
+            b: sanitize(b, 300),
+            c: sanitize(c, 300),
+            d: sanitize(d, 300),
+            correct: corr
+          });
         }
       });
 
       const el = document.getElementById('q-loaded-count');
+
       if (parsed.length > 0) {
+
+        /*
+         * Room-specific questions.
+         *
+         * Correct answer serverQuizમાં રહેશે.
+         * Player તેને વાંચી શકશે નહીં.
+         */
         questions = parsed;
-        db.ref('saved_quiz_questions').set(parsed);
-        el.innerText = `✅ ${parsed.length} પ્રશ્નો લોડ`;
-        el.className = "q-count-badge success";
-        showToast(`✅ ${parsed.length} પ્રશ્નો લોડ થયા!`, 'success');
+
+        const questionUpdates = {};
+
+        parsed.forEach((question, index) => {
+          questionUpdates[index] = {
+            q: question.q,
+            a: question.a,
+            b: question.b,
+            c: question.c,
+            d: question.d,
+            correct: question.correct
+          };
+        });
+
+        db.ref('serverQuiz/' + currentPin + '/questions')
+          .set(questionUpdates)
+          .then(() => {
+
+            el.innerText = `✅ ${parsed.length} પ્રશ્નો લોડ`;
+            el.className = "q-count-badge success";
+
+            showToast(
+              `✅ ${parsed.length} પ્રશ્નો આ Roomમાં સુરક્ષિત રીતે લોડ થયા!`,
+              'success'
+            );
+
+          })
+          .catch(err => {
+
+            console.error("Question upload error:", err);
+
+            el.innerText = `❌ અપલોડ નિષ્ફળ`;
+            el.className = "q-count-badge error";
+
+            showToast(
+              "પ્રશ્નો server પર save થઈ શક્યા નથી: " + err.message,
+              'error'
+            );
+          });
+
       } else {
+
         el.innerText = `❌ ફાઈલ ખોટી`;
         el.className = "q-count-badge error";
-        showToast("⚠ ફાઈલમાં યોગ્ય ડેટા મળ્યો નથી", 'error');
+
+        showToast(
+          "⚠ ફાઈલમાં યોગ્ય ડેટા મળ્યો નથી",
+          'error'
+        );
       }
+
     } catch (err) {
+
       const el = document.getElementById('q-loaded-count');
+
       el.innerText = `❌ ફાઈલ ખોટી`;
       el.className = "q-count-badge error";
-      showToast("ફાઈલ ભૂલ: " + err.message, 'error');
+
+      showToast(
+        "ફાઈલ ભૂલ: " + err.message,
+        'error'
+      );
     }
   };
+
   reader.readAsArrayBuffer(file);
 }
 
