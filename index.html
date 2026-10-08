@@ -174,6 +174,51 @@
     font-weight: 800; margin-top: 10px;
   }
 
+  /* ===== લાઈવ પ્લેયર સ્ટેટસ ===== */
+  .live-status-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 10px;
+    max-height: 120px;
+    overflow-y: auto;
+    padding: 5px;
+  }
+
+  .player-status-pill {
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 2px solid rgba(255,255,255,0.1);
+    transition: all 0.3s;
+    font-family: 'Noto Sans Gujarati', sans-serif;
+  }
+
+  .player-status-pill.answered {
+    border-color: #ffeb3b;
+    color: #ffeb3b;
+    background: rgba(255, 235, 59, 0.15);
+  }
+
+  .player-status-pill.correct {
+    border-color: #4caf50;
+    background: rgba(76, 175, 80, 0.35);
+    color: #fff;
+  }
+
+  .player-status-pill.wrong {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.35);
+    color: #fff;
+  }
+
   .score-row { background: white; color: #333; margin: 8px auto; max-width: 550px; padding: 14px 22px; border-radius: 10px; display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; box-shadow: 0 3px 10px rgba(0,0,0,0.2); animation: slideIn 0.4s ease-out; }
   @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
@@ -245,6 +290,9 @@
     #host-game .opt { font-size: 12.5px; padding: 10px 6px; min-height: 68px; line-height: 1.2; }
     #host-game .options-grid { gap: 6px; }
     #host-game .answer-counter { font-size: 13px; padding: 5px 14px; margin-top: 8px; }
+
+    .player-status-pill { font-size: 11px; padding: 5px 10px; }
+    .live-status-container { max-height: 90px; gap: 5px; margin-top: 8px; }
   }
 
   @media (min-width: 601px) {
@@ -334,6 +382,8 @@
       <div class="opt opt-d" id="lbl-d">■ D</div>
     </div>
     <div class="answer-counter" id="answer-counter">📊 જવાબ: 0</div>
+    <!-- ===== લાઈવ પ્લેયર સ્ટેટસ ===== -->
+    <div id="live-players-status" class="live-status-container"></div>
 
     <div class="admin-controls">
       <div class="row-pair">
@@ -514,9 +564,9 @@ let timerInterval = null;
 let hostAnswersRef = null;
 let currentAnswerCount = 0;
 let revealTime = 0;
+let hostPlayersRef = null;
 
 function openHostPanel() {
-  // ✅ Auth તૈયાર ન હોય તો રાહ જુઓ
   if (!authReady || !currentUid) {
     showToast("⏳ Firebase સાથે જોડાઈ રહ્યા છીએ, 2 સેકન્ડ રાહ જુઓ...", 'info');
     setTimeout(openHostPanel, 1500);
@@ -561,6 +611,13 @@ function openHostPanel() {
       list.innerHTML += `<div class="player-badge">👤 ${sanitize(p.name)}</div>`;
     });
   });
+
+  // ===== લાઈવ પ્લેયર સ્ટેટસ માટે players listener =====
+  if (hostPlayersRef) hostPlayersRef.off();
+  hostPlayersRef = roomRef.child('players');
+  hostPlayersRef.on('value', () => {
+    renderLivePlayersStatus();
+  });
 }
 
 function broadcastPin() {
@@ -570,7 +627,7 @@ function broadcastPin() {
 
 function downloadSampleExcel() {
   const sample = [{
-    "Question": "પૃથ્વી પર સૌથી મોટું અક્ષાંશવૃત્ત કયું છે?",
+    "Question": "પૃથ્વી પર સૌથી મોટો અક્ષાંશવૃત્ત કયું છે?",
     "a": "કર્કવૃત્ત", "b": "વિષુવવૃત્ત", "c": "મકરવૃત્ત", "d": "ધ્રુવવૃત્ત",
     "Correct Answer": "b"
   }];
@@ -681,6 +738,7 @@ function loadHostQuestion(idx) {
     const count = snap.numChildren();
     currentAnswerCount = count;
     document.getElementById('answer-counter').innerText = `📊 જવાબ: ${count}`;
+    renderLivePlayersStatus(); // 👈 લાઈવ સ્ટેટસ અપડેટ
   });
 
   clearInterval(timerInterval);
@@ -712,6 +770,9 @@ function loadHostQuestion(idx) {
       timeUpHost();
     }
   }, 500);
+
+  // શરૂઆતમાં જ લાઈવ સ્ટેટસ દેખાડો
+  setTimeout(renderLivePlayersStatus, 300);
 }
 
 async function timeUpHost() {
@@ -721,6 +782,7 @@ async function timeUpHost() {
   revealTime = Date.now();
 
   await calculateAndBroadcastScores(currentQIdx);
+  renderLivePlayersStatus(); // 👈 સ્કોર અપડેટ પછી લાઈવ સ્ટેટસ રિફ્રેશ
 }
 
 async function calculateAndBroadcastScores(qIdx) {
@@ -770,6 +832,56 @@ async function calculateAndBroadcastScores(qIdx) {
   updates['state'] = 'reveal';
   updates['correctAnswer'] = q.correct;
   await roomRef.update(updates);
+}
+
+/* ================= લાઈવ પ્લેયર સ્ટેટસ ================= */
+async function renderLivePlayersStatus() {
+  const container = document.getElementById('live-players-status');
+  if (!container) return;
+  if (document.getElementById('host-game').style.display === 'none') return;
+
+  try {
+    const playersSnap = await roomRef.child('players').once('value');
+    const players = playersSnap.val() || {};
+    const answersSnap = await roomRef.child('answers/' + currentQIdx).once('value');
+    const answers = answersSnap.val() || {};
+    const stateSnap = await roomRef.child('state').once('value');
+    const currentState = stateSnap.val();
+
+    let html = "";
+    const sortedPlayers = Object.keys(players)
+      .map(id => ({ id, ...players[id] }))
+      .sort((a, b) => (Number(b.score) || 0) - (Number(a.score) || 0));
+
+    if (sortedPlayers.length === 0) {
+      container.innerHTML = `<div style="font-size:12px; opacity:0.6;">હજી કોઈ ખેલાડી જોડાયો નથી...</div>`;
+      return;
+    }
+
+    sortedPlayers.forEach(p => {
+      const hasAnswered = answers[p.id] !== undefined;
+      let cls = "player-status-pill";
+      let icon = "⏸️";
+
+      if (hasAnswered) {
+        if (currentState === 'reveal' || currentState === 'review') {
+          const correctAns = (questions[currentQIdx] && questions[currentQIdx].correct) || "";
+          const isCorrect = answers[p.id].ans === correctAns;
+          cls += isCorrect ? " correct" : " wrong";
+          icon = isCorrect ? "✅" : "❌";
+        } else {
+          cls += " answered";
+          icon = "⏳";
+        }
+      }
+
+      html += `<div class="${cls}">${icon} ${sanitize(p.name)} - ${Number(p.score) || 0}</div>`;
+    });
+
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("Live status error:", err);
+  }
 }
 
 function adminForceNextQuestion() {
@@ -838,6 +950,8 @@ function loadHostQuestionReview(idx) {
   });
 
   document.getElementById('answer-counter').innerText = `🔍 રિવ્યુ મોડ`;
+
+  renderLivePlayersStatus(); // 👈 રિવ્યુ મોડ માટે પણ સ્ટેટસ અપડેટ
 
   showToast("📖 રિવ્યુ મોડ — પ્લેયર્સ ફક્ત જોઈ શકશે", 'info');
 }
@@ -927,7 +1041,6 @@ function initPlayer() {
 }
 
 function joinPlayerRoom() {
-  // ✅ Auth તૈયાર ન હોય તો રાહ જુઓ
   if (!authReady || !currentUid) {
     showToast("⏳ Firebase સાથે જોડાઈ રહ્યા છીએ, 2 સેકન્ડ રાહ જુઓ...", 'info');
     setTimeout(joinPlayerRoom, 1500);
@@ -953,7 +1066,6 @@ function joinPlayerRoom() {
       return showToast("PIN મળ્યો નથી! એડમિન ચાલુ છે?", 'error');
     }
 
-    // ✅ FIX: ફક્ત name + joinedAt લખો (score/streak એડમિન ઉમેરશે)
     playerRoomRef.child('players/' + playerId).update({
       name: name,
       joinedAt: Date.now()
