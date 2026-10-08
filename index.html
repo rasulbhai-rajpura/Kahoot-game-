@@ -20,12 +20,12 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #46178f; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow-x: hidden; }
   .container { width: 92%; max-width: 900px; padding: 15px; margin: auto; }
-  .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 6px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 0; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
   .btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
   .btn:active { transform: scale(0.96); }
   .btn-green { background: #26890c; }
   .btn-upload { background: #f39c12; }
-  .btn-broadcast { background: #e91e63; font-size: 20px; padding: 14px 28px; }
+  .btn-broadcast { background: #e91e63; font-size: 18px; padding: 12px 22px; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
   input { width: 100%; max-width: 340px; padding: 14px; margin-bottom: 12px; font-size: 18px; border: 2px solid #ccc; border-radius: 8px; text-align: center; outline: none; transition: 0.2s; }
@@ -66,7 +66,6 @@
     100% { background-position: 300% 50%; }
   }
 
-  /* Body ત્યાં સુધી ખસેડો જેટલી creator bar ની ઊંચાઈ છે */
   body { padding-top: 40px; }
 
   /* Connection Status */
@@ -83,12 +82,93 @@
 
   /* Host */
   #host-view { display: none; width: 100%; }
-  .pin-box { font-size: 42px; font-weight: bold; background: white; color: #333; padding: 12px 28px; border-radius: 12px; display: inline-block; margin: 15px 0; letter-spacing: 4px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+  .pin-box { font-size: 36px; font-weight: 900; background: white; color: #46178f; padding: 12px 22px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin: 0; letter-spacing: 4px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 3px solid #ffd700; font-family: 'Courier New', monospace; min-height: 56px; }
+
+  /* ===== Row Pair (જોડે જોડે બે બટન) ===== */
+  .row-pair {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+    width: 100%;
+  }
+  .row-pair > * {
+    flex: 1 1 45%;
+    min-width: 0;
+    min-height: 56px;
+  }
+  .row-pair > .pin-box {
+    flex: 1 1 45%;
+    min-height: 56px;
+  }
+  .row-pair > .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+
+  /* ===== Question Count Badge ===== */
+  .q-count-badge {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #ffeb3b;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffeb3b;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    white-space: nowrap;
+    transition: all 0.3s;
+    text-align: center;
+  }
+  .q-count-badge.loading { color: #ffeb3b; border-color: #ffeb3b; }
+  .q-count-badge.success {
+    color: #4caf50;
+    border-color: #4caf50;
+    animation: countGlow 2s infinite;
+  }
+  .q-count-badge.error { color: #e74c3c; border-color: #e74c3c; }
+  @keyframes countGlow {
+    0%, 100% { box-shadow: 0 4px 12px rgba(76,175,80,0.3); }
+    50% { box-shadow: 0 4px 20px rgba(76,175,80,0.7); }
+  }
+
+  /* ===== Start Game Button ===== */
+  .btn-start-game {
+    background: linear-gradient(135deg, #26890c, #4caf50) !important;
+    font-size: 17px !important;
+    border-radius: 10px !important;
+    font-weight: bold;
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(38,137,12,0.5);
+    animation: startPulse 2s infinite;
+    white-space: nowrap;
+  }
+  .btn-start-game:hover { filter: brightness(1.15); transform: translateY(-2px); }
+  .btn-start-game:active { transform: scale(0.96); }
+  @keyframes startPulse {
+    0%, 100% { box-shadow: 0 6px 20px rgba(38,137,12,0.5); }
+    50% { box-shadow: 0 6px 30px rgba(38,137,12,0.9); }
+  }
+
   .players-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 50px; margin-top: 15px; }
   .player-badge { background: rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-size: 17px; font-weight: bold; animation: popIn 0.3s ease-out; }
   @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-  .admin-controls { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .admin-controls { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; flex-direction: column; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .admin-controls .row-pair { margin: 0; }
+
   .question-card { background: white; color: #222; padding: 22px; border-radius: 15px; font-size: 22px; font-weight: bold; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: left; line-height: 1.4; }
   .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
   .opt { padding: 18px; font-size: 19px; font-weight: bold; color: white; border-radius: 10px; text-align: left; transition: all 0.3s; }
@@ -152,12 +232,49 @@
   .q-progress { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; margin-bottom: 15px; }
   .q-progress-bar { height: 100%; background: linear-gradient(90deg, #ffd700, #e91e63); transition: width 0.5s; }
 
+  /* ===== મોબાઈલ માટે ખાસ ગોઠવણી ===== */
   @media (max-width: 600px) {
     .options-grid { grid-template-columns: 1fr; }
     .podium-step { width: 30%; }
-    .pin-box { font-size: 32px; }
-    h1 { font-size: 24px !important; }
+    .pin-box { font-size: 24px; padding: 10px 12px; letter-spacing: 2px; min-height: 50px; }
+    h1 { font-size: 22px !important; }
     .p-name { font-size: 14px; }
+
+    .row-pair { gap: 8px; margin: 8px 0; }
+    .row-pair > * { flex: 1 1 45%; min-height: 50px; }
+    .row-pair > .btn {
+      font-size: 13px;
+      padding: 8px 8px;
+      white-space: normal;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+    .row-pair > .pin-box {
+      font-size: 22px;
+      padding: 8px 10px;
+      letter-spacing: 1.5px;
+    }
+    .q-count-badge {
+      font-size: 12px;
+      padding: 8px 10px;
+      white-space: normal;
+      line-height: 1.2;
+    }
+    .btn-start-game {
+      font-size: 14px !important;
+    }
+
+    .admin-controls { padding: 10px; }
+    .admin-controls .row-pair > .btn {
+      font-size: 13px !important;
+      padding: 10px 6px !important;
+    }
+  }
+
+  @media (min-width: 601px) {
+    .row-pair > .btn { font-size: 17px; padding: 14px 20px; }
+    .q-count-badge { font-size: 16px; padding: 14px 22px; }
+    .btn-start-game { font-size: 19px !important; padding: 14px 24px !important; }
   }
 </style>
 </head>
@@ -202,20 +319,30 @@
 <!-- HOST VIEW -->
 <div id="host-view">
   <div class="container" id="host-lobby">
-    <h2>👑 પ્રોફેશનલ એડમિન કંટ્રોલ</h2>
-    <div class="pin-box">PIN: <span id="room-pin">------</span></div>
+    <h2 style="margin: 8px 0 14px;">👑 એડમિન કંટ્રોલ</h2>
 
-    <div style="margin: 15px 0;">
-      <button class="btn btn-broadcast" onclick="broadcastPin()">📡 પ્લેયર્સને PIN મોકલો</button><br>
-      <button class="btn" style="background:#00897b;" onclick="downloadSampleExcel()">📥 નમૂનાની Excel</button>
-      <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
-      <button class="btn btn-upload" onclick="document.getElementById('excelFileInput').click()">📁 Excel / CSV અપલોડ</button>
-      <div id="q-loaded-count" style="margin-top: 10px; font-weight: bold; color:#ffeb3b;">(પ્રશ્નો ચકાસી રહ્યા છીએ...)</div>
+    <!-- ===== Row 1: PIN + Broadcast ===== -->
+    <div class="row-pair">
+      <div class="pin-box">PIN: <span id="room-pin">------</span></div>
+      <button class="btn btn-broadcast" onclick="broadcastPin()">📡 PIN મોકલો</button>
     </div>
 
+    <!-- ===== Row 2: Excel Download + Upload ===== -->
+    <div class="row-pair">
+      <button class="btn" style="background:#00897b;" onclick="downloadSampleExcel()">📥 નમૂનાની Excel</button>
+      <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
+      <button class="btn btn-upload" onclick="document.getElementById('excelFileInput').click()">📁 Excel અપલોડ</button>
+    </div>
+
+    <!-- ===== Row 3: Question Count + Start Game ===== -->
+    <div class="row-pair">
+      <div id="q-loaded-count" class="q-count-badge loading">(ચકાસી રહ્યા છીએ...)</div>
+      <button class="btn btn-start-game" onclick="adminStartGameCommand()">▶ ગેમ શરૂ કરો</button>
+    </div>
+
+    <!-- Players List -->
+    <h3 style="margin: 18px 0 8px; font-size: 18px;">👥 રમનારા ખેલાડીઓ</h3>
     <div class="players-list" id="lobby-players"></div>
-    <br>
-    <button class="btn btn-green" style="font-size:24px; padding:15px 35px;" onclick="adminStartGameCommand()">▶ ગેમ શરૂ કરો</button>
   </div>
 
   <div class="container" id="host-game" style="display:none;">
@@ -239,11 +366,16 @@
     </div>
     <div class="answer-counter" id="answer-counter">📊 જવાબ: 0</div>
 
+    <!-- ===== Admin Controls: Review + Next જોડે જોડે ===== -->
     <div class="admin-controls">
-      <button class="btn" style="background:#607d8b;" onclick="adminPrevQuestion()">⏮️ પાછળનો પ્રશ્ન</button>
-      <button class="btn btn-upload" onclick="showScores()">📊 સ્કોરબોર્ડ</button>
-      <button class="btn btn-green" onclick="adminForceNextQuestion()">⏩ આગળનો પ્રશ્ન</button>
-      <button class="btn" style="background:#e74c3c;" onclick="adminEndGame()">🛑 ગેમ સમાપ્ત</button>
+      <div class="row-pair">
+        <button class="btn" style="background:#607d8b;" onclick="adminPrevQuestion()">⏮️ પાછળનો પ્રશ્ન</button>
+        <button class="btn btn-green" onclick="adminForceNextQuestion()">⏩ આગળનો પ્રશ્ન</button>
+      </div>
+      <div class="row-pair">
+        <button class="btn btn-upload" onclick="showScores()">📊 સ્કોરબોર્ડ</button>
+        <button class="btn" style="background:#e74c3c;" onclick="adminEndGame()">🛑 ગેમ સમાપ્ત</button>
+      </div>
     </div>
   </div>
 
@@ -355,7 +487,7 @@ async function sha256(text) {
 
 function showToast(msg, type = 'info') {
   const t = document.createElement('div');
-  t.style.cssText = `position:fixed;top:60px;left:50%;transform:translateX(-50%);background:${type==='error'?'#e74c3c':type==='success'?'#26890c':'#333'};color:white;padding:12px 24px;border-radius:8px;font-weight:bold;z-index:99999;box-shadow:0 5px 20px rgba(0,0,0,0.3);animation:popIn 0.3s;`;
+  t.style.cssText = `position:fixed;top:60px;left:50%;transform:translateX(-50%);background:${type==='error'?'#e74c3c':type==='success'?'#26890c':'#333'};color:white;padding:12px 24px;border-radius:8px;font-weight:bold;z-index:99999;box-shadow:0 5px 20px rgba(0,0,0,0.3);animation:popIn 0.3s;max-width:90vw;`;
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3000);
@@ -435,13 +567,14 @@ function openHostPanel() {
 
   // Load saved questions
   db.ref('saved_quiz_questions').once('value', snap => {
+    const el = document.getElementById('q-loaded-count');
     if (snap.exists()) {
       questions = snap.val();
-      document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો લોડ થયા)`;
-      document.getElementById('q-loaded-count').style.color = "#4caf50";
+      el.innerText = `✅ ${questions.length} પ્રશ્નો લોડ`;
+      el.className = "q-count-badge success";
     } else {
-      document.getElementById('q-loaded-count').innerText = "(Excel ફાઈલ અપલોડ કરો)";
-      document.getElementById('q-loaded-count').style.color = "#ffeb3b";
+      el.innerText = `⚠ Excel અપલોડ કરો`;
+      el.className = "q-count-badge loading";
     }
   });
 
@@ -507,16 +640,22 @@ function handleExcelUpload(e) {
         }
       });
 
+      const el = document.getElementById('q-loaded-count');
       if (parsed.length > 0) {
         questions = parsed;
         db.ref('saved_quiz_questions').set(parsed);
-        document.getElementById('q-loaded-count').innerText = `(${parsed.length} પ્રશ્નો લોડ થયા ✓)`;
-        document.getElementById('q-loaded-count').style.color = "#4caf50";
+        el.innerText = `✅ ${parsed.length} પ્રશ્નો લોડ`;
+        el.className = "q-count-badge success";
         showToast(`✅ ${parsed.length} પ્રશ્નો લોડ થયા!`, 'success');
       } else {
+        el.innerText = `❌ ફાઈલ ખોટી`;
+        el.className = "q-count-badge error";
         showToast("⚠ ફાઈલમાં યોગ્ય ડેટા મળ્યો નથી", 'error');
       }
     } catch (err) {
+      const el = document.getElementById('q-loaded-count');
+      el.innerText = `❌ ફાઈલ ખોટી`;
+      el.className = "q-count-badge error";
       showToast("ફાઈલ ભૂલ: " + err.message, 'error');
     }
   };
@@ -547,11 +686,9 @@ function loadHostQuestion(idx) {
   document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
   document.getElementById('answer-counter').innerText = `📊 જવાબ: 0`;
 
-  // Progress bar
   const progress = ((idx) / questions.length) * 100;
   document.getElementById('q-progress-bar').style.width = progress + '%';
 
-  // ✅ SECURE: Do NOT send correct answer to DB
   const startTime = Date.now();
   roomRef.update({
     state: "question",
@@ -562,10 +699,8 @@ function loadHostQuestion(idx) {
     questionDuration: CONFIG.QUESTION_TIME
   });
 
-  // Clear old answers
   roomRef.child('answers/' + idx).remove();
 
-  // Listen for answers in real time
   if (hostAnswersRef) hostAnswersRef.off();
   hostAnswersRef = roomRef.child('answers/' + idx);
   hostAnswersRef.on('value', snap => {
@@ -574,7 +709,6 @@ function loadHostQuestion(idx) {
     document.getElementById('answer-counter').innerText = `📊 જવાબ: ${count}`;
   });
 
-  // Circular timer
   clearInterval(timerInterval);
   const totalSec = CONFIG.QUESTION_TIME;
   const circumference = 2 * Math.PI * 26;
@@ -612,7 +746,6 @@ async function timeUpHost() {
   document.getElementById(`lbl-${q.correct}`).classList.add('correct-highlight');
   revealTime = Date.now();
 
-  // ✅ SECURE SCORING: Calculate on host, then broadcast
   await calculateAndBroadcastScores(currentQIdx);
 }
 
@@ -631,7 +764,6 @@ async function calculateAndBroadcastScores(qIdx) {
     const ans = answers[pid];
 
     if (!ans) {
-      // No answer: reset streak
       updates[`players/${pid}/streak`] = 0;
       continue;
     }
@@ -661,7 +793,6 @@ async function calculateAndBroadcastScores(qIdx) {
     updates[`players/${pid}/lastPoints`] = pts;
   }
 
-  // Broadcast reveal — now safe because scoring is complete
   updates['state'] = 'reveal';
   updates['correctAnswer'] = q.correct;
   await roomRef.update(updates);
@@ -688,7 +819,6 @@ function adminEndGame() {
 
 /* ================= ⏮️ PREVIOUS QUESTION (REVIEW MODE) ================= */
 function adminPrevQuestion() {
-  // પહેલા પ્રશ્ન હોય તો કંઈ ન કરો
   if (currentQIdx <= 0) {
     showToast("⚠️ આ પહેલો પ્રશ્ન છે!", 'error');
     return;
@@ -697,10 +827,8 @@ function adminPrevQuestion() {
   clearInterval(timerInterval);
   if (hostAnswersRef) hostAnswersRef.off();
 
-  // એક પ્રશ્ન પાછળ જાઓ
   currentQIdx = currentQIdx - 1;
 
-  // Leaderboard બંધ કરો જો ખુલ્લું હોય
   document.getElementById('host-leaderboard').style.display = 'none';
   document.getElementById('host-game').style.display = 'block';
 
@@ -719,17 +847,14 @@ function loadHostQuestionReview(idx) {
   document.getElementById('lbl-c').innerText = `● ${q.c}`;
   document.getElementById('lbl-d').innerText = `■ ${q.d}`;
 
-  // સાચો જવાબ હાઈલાઈટ કરો
   document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
   document.getElementById(`lbl-${q.correct}`).classList.add('correct-highlight');
 
-  // ટાઈમર 0 બતાવો
   document.getElementById('timer-val').innerText = "0";
   const circumference = 2 * Math.PI * 26;
   document.getElementById('timer-circle-fg').style.strokeDashoffset = circumference;
   document.getElementById('timer-circle-fg').style.stroke = '#e74c3c';
 
-  // ✅ Review mode — state "review" મોકલો, પ્લેયર્સ જવાબ ન આપી શકે
   roomRef.update({
     state: "review",
     currentQuestion: idx,
@@ -774,7 +899,6 @@ function showFinalPodium() {
   document.getElementById('sound-win').play().catch(()=>{});
   roomRef.update({ state: "ended" });
 
-  // Confetti
   const duration = 5000;
   const end = Date.now() + duration;
   (function frame() {
@@ -821,7 +945,6 @@ function initPlayer() {
     }
   });
 
-  // Keyboard shortcuts
   document.addEventListener('keydown', e => {
     if (document.getElementById('player-question-container').style.display === 'block') {
       const map = { '1': 'a', '2': 'b', '3': 'c', '4': 'd' };
@@ -838,7 +961,7 @@ function joinPlayerRoom() {
 
   if (!pin || !name) return showToast("PIN અને નામ જરૂરી છે!", 'error');
 
-  playerId = currentUid; // Use Firebase UID — secure & unique
+  playerId = currentUid;
   const btn = document.getElementById('btn-enter');
   btn.innerHTML = '<span class="spinner"></span>જોડાઈ રહ્યા છીએ...';
   btn.disabled = true;
@@ -871,7 +994,6 @@ function listenPlayerGame() {
     const val = snap.val();
     if (!val) return;
 
-    // Sync score
     if (val.players && val.players[playerId]) {
       currentScore = Number(val.players[playerId].score) || 0;
       currentStreak = Number(val.players[playerId].streak) || 0;
@@ -910,7 +1032,6 @@ function listenPlayerGame() {
       }
     }
     else if (val.state === "review") {
-      // ✅ REVIEW MODE — પ્લેયર્સ ફક્ત જોઈ શકે, જવાબ ન આપી શકે
       const qIdx = Number(val.currentQuestion);
       document.getElementById('player-q-num').innerText = `પ્રશ્ન ${qIdx + 1} (રિવ્યુ)`;
       document.getElementById('player-q-text').innerText = val.questionText || "";
@@ -922,7 +1043,6 @@ function listenPlayerGame() {
         document.getElementById('player-lbl-d').innerText = val.options.d || "";
       }
 
-      // બધા બટન બંધ + ઓછા દેખાય
       document.querySelectorAll('.player-opt-btn').forEach(btn => {
         btn.disabled = true;
         btn.style.opacity = '0.5';
@@ -930,7 +1050,6 @@ function listenPlayerGame() {
         btn.style.transform = 'none';
       });
 
-      // સાચો જવાબ હાઈલાઈટ
       const correctKey = (val.correctAnswer || "").toLowerCase();
       const keyMap = { 'a': '1', 'b': '2', 'c': '3', 'd': '4' };
       const correctBtn = document.querySelector(`.player-opt-btn[data-key="${keyMap[correctKey]}"]`);
@@ -946,7 +1065,6 @@ function listenPlayerGame() {
         `<div class="feedback-box" style="background:#607d8b;">📖 રિવ્યુ — સાચો જવાબ 🟡 પીળા બોર્ડરમાં છે</div>`;
     }
     else if (val.state === "reveal") {
-      // Show correct answer feedback
       if (!hasAnswered) {
         showPlayerFeedback(false, "⏰ સમય પૂરો! જવાબ આપ્યો નથી.");
       }
@@ -977,12 +1095,10 @@ function sendPlayerAnswer(selected) {
   const cleanSelected = selected.toString().trim().toLowerCase();
   const now = Date.now();
 
-  // ✅ SECURE: Just send answer, no scoring here. Host will validate.
   playerRoomRef.child(`answers/${lastProcessedQ}/${playerId}`).set({
     ans: cleanSelected,
     time: now
   }).then(() => {
-    // Optimistic feedback (host will sync actual score)
     showPlayerFeedback(true, "જવાબ સબમિટ થયો ✨");
   });
 
