@@ -918,53 +918,65 @@ async function timeUpHost() {
   renderLivePlayersStatus();
 }
 
-async function calculateAndBroadcastScores(qIdx) {
-  const q = questions[qIdx];
-  const answersSnap = await roomRef.child('answers/' + qIdx).once('value');
-  const answers = answersSnap.val() || {};
-  const qStartTime = (await roomRef.child('questionStartTime').once('value')).val();
-  const playersSnap = await roomRef.child('players').once('value');
-  const players = playersSnap.val() || {};
+async function calculateAndBroadcastScores() {
+  if (!currentPin) return;
 
-  const updates = {};
+  const roomRef = db.ref(`rooms/${currentPin}`);
 
-  for (const pid in players) {
-    const player = players[pid];
-    const ans = answers[pid];
+  try {
+    const snap = await roomRef.once("value");
+    const room = snap.val();
 
-    if (!ans) {
-      updates[`players/${pid}/streak`] = 0;
-      continue;
+    if (!room) return;
+
+    const qIdx = Number(room.currentQuestion);
+
+    if (!Number.isInteger(qIdx) || qIdx < 0) {
+      console.warn("Invalid question index:", qIdx);
+      return;
     }
 
-    const isCorrect = ans.ans === q.correct;
-    let pts = 0;
-    let newStreak = 0;
+    /*
+     * મહત્વપૂર્ણ:
+     * અહીં હવે કોઈ player નો score ગણવામાં આવતો નથી.
+     *
+     * Score Cloud Function દ્વારા:
+     * Answer → Validation → Timeout → Correct Answer
+     * → Atomic Transaction → Score
+     * કરવામાં આવશે.
+     */
 
-    if (isCorrect) {
-      const responseSec = Math.min(
-        CONFIG.QUESTION_TIME,
-        Math.max(0, (ans.time - qStartTime) / 1000)
-      );
-      pts = Math.round(CONFIG.MAX_POINTS - (responseSec * 25));
-      if (pts < CONFIG.MIN_POINTS) pts = CONFIG.MIN_POINTS;
+    await roomRef.update({
+      state: "review",
 
-      newStreak = (Number(player.streak) || 0) + 1;
-      if (newStreak >= 2) pts += CONFIG.STREAK_BONUS * (newStreak - 1);
-    } else {
-      newStreak = 0;
-    }
+      /*
+       * પ્રશ્ન ક્યારે બંધ થયો તેનો Firebase server timestamp.
+       * Cloud Function આ timestampનો ઉપયોગ કરશે જેથી
+       * પ્રશ્ન બંધ થયા પછી આવેલ જવાબ reject થઈ શકે.
+       */
+      [`questionClosedAt/${qIdx}`]:
+        firebase.database.ServerValue.TIMESTAMP,
 
-    const newScore = (Number(player.score) || 0) + pts;
-    updates[`players/${pid}/score`] = newScore;
-    updates[`players/${pid}/streak`] = newStreak;
-    updates[`players/${pid}/lastCorrect`] = isCorrect;
-    updates[`players/${pid}/lastPoints`] = pts;
+      /*
+       * Correct answer માત્ર review સમયે host UI માટે.
+       * ServerQuizમાંથી મેળવવામાં આવશે.
+       */
+      revealAt:
+        firebase.database.ServerValue.TIMESTAMP
+    });
+
+    console.log(
+      "Question closed. Server will finalize scores:",
+      currentPin,
+      qIdx
+    );
+
+  } catch (error) {
+    console.error(
+      "Question close error:",
+      error
+    );
   }
-
-  updates['state'] = 'reveal';
-  updates['correctAnswer'] = q.correct;
-  await roomRef.update(updates);
 }
 
 async function renderLivePlayersStatus() {
