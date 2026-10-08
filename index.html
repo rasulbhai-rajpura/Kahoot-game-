@@ -841,17 +841,6 @@ function adminStartGameCommand() {
   }, 2000);
 }
 function loadHostQuestion(idx) {
-  if (!currentPin) return;
-
-  if (!questions || !questions[idx]) {
-    alert("આ પ્રશ્ન ઉપલબ્ધ નથી.");
-    return;
-  }
-
-  const q = questions[idx];
-  const roomRef = db.ref(`rooms/${currentPin}`);
-
-  function loadHostQuestion(idx) {
   if (!currentPin || !questions || !questions[idx]) {
     alert("આ પ્રશ્ન ઉપલબ્ધ નથી.");
     return;
@@ -886,6 +875,7 @@ function loadHostQuestion(idx) {
       alert("પ્રશ્ન શરૂ કરવામાં સમસ્યા આવી.");
     });
 }
+
 
 
 async function timeUpHost() {
