@@ -684,6 +684,7 @@ function handleExcelUpload(e) {
 }
 
 function adminStartGameCommand() {
+  unlockAudio(); // ✅ Audio unlock
   if (!questions.length) {
     showToast("⚠ પહેલા Excel અપલોડ કરો!", 'error');
     return;
@@ -692,7 +693,6 @@ function adminStartGameCommand() {
   document.getElementById('host-game').style.display = 'block';
   loadHostQuestion(0);
 
-  // ✅ લાઈવ સ્ટેટસ દર 2 સેકન્ડે રિફ્રેશ
   if (liveStatusInterval) clearInterval(liveStatusInterval);
   liveStatusInterval = setInterval(() => {
     if (document.getElementById('host-game').style.display !== 'none') {
@@ -880,7 +880,6 @@ async function renderLivePlayersStatus() {
   }
 }
 
-// ✅ FIX: પ્રશ્ન ચાલુ હોય તો પહેલા ગુણ ગણો, પછી આગળ વધો
 async function adminForceNextQuestion() {
   clearInterval(timerInterval);
   if (hostAnswersRef) hostAnswersRef.off();
@@ -901,8 +900,8 @@ async function adminForceNextQuestion() {
   }
 }
 
-// ✅ FIX: ગેમ સમાપ્ત કરતા પહેલા ગુણ ગણો
 async function adminEndGame() {
+  unlockAudio(); // ✅ Audio unlock
   if (!confirm("ગેમ સમાપ્ત કરવી છે?")) return;
   clearInterval(timerInterval);
   if (liveStatusInterval) clearInterval(liveStatusInterval);
@@ -997,7 +996,17 @@ function showFinalPodium() {
   document.getElementById('host-game').style.display = 'none';
   document.getElementById('host-podium').style.display = 'block';
 
-  document.getElementById('sound-win').play().catch(()=>{});
+  // ✅ Web Audio API થી વિનર સાઉન્ડ
+  playWinSound();
+
+  // ✅ બેકઅપ: જૂનું audio element પણ ટ્રાય કરો
+  const winAudio = document.getElementById('sound-win');
+  try {
+    winAudio.currentTime = 0;
+    winAudio.volume = 0.6;
+    winAudio.play().catch(()=>{});
+  } catch(e) {}
+
   roomRef.update({ state: "ended" });
 
   const duration = 5000;
@@ -1229,6 +1238,61 @@ function showPlayerFeedback(isCorrect, text) {
   } else {
     document.getElementById('sound-wrong').play().catch(()=>{});
   }
+}
+
+/* ===== ✅ વિનર સાઉન્ડ (Web Audio API) ===== */
+function playWinSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+
+    const melody = [
+      { freq: 523.25, time: 0.00, dur: 0.20 },
+      { freq: 659.25, time: 0.20, dur: 0.20 },
+      { freq: 783.99, time: 0.40, dur: 0.20 },
+      { freq: 1046.50, time: 0.60, dur: 0.60 },
+      { freq: 783.99, time: 1.10, dur: 0.15 },
+      { freq: 1046.50, time: 1.25, dur: 0.80 }
+    ];
+
+    melody.forEach(note => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'triangle';
+      osc.frequency.value = note.freq;
+
+      const startAt = ctx.currentTime + note.time;
+      gain.gain.setValueAtTime(0.001, startAt);
+      gain.gain.exponentialRampToValueAtTime(0.35, startAt + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startAt + note.dur);
+
+      osc.start(startAt);
+      osc.stop(startAt + note.dur + 0.05);
+    });
+  } catch (err) {
+    console.error("Win sound error:", err);
+  }
+}
+
+/* ===== ✅ Audio Unlock ===== */
+let audioUnlocked = false;
+function unlockAudio() {
+  if (audioUnlocked) return;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.value = 0.001;
+    osc.start();
+    osc.stop(ctx.currentTime + 0.01);
+    audioUnlocked = true;
+    console.log("Audio unlocked");
+  } catch(e) {}
 }
 </script>
 </body>
