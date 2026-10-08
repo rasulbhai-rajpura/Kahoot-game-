@@ -1,67 +1,45 @@
 {
   "rules": {
-    ".read": false,
-    ".write": false,
-
     "rooms": {
       "$pin": {
         ".read": "auth != null",
-
-        ".write": "auth != null && ((!data.exists() && newData.child('hostUid').val() === auth.uid) || (data.exists() && data.child('hostUid').val() === auth.uid))",
-
+        
+        // ફક્ત Host જ રૂમની સ્થિતિ અને પ્રશ્નો મેનેજ કરી શકે
+        ".write": "auth != null && (!data.exists() || data.child('hostUid').val() === auth.uid)",
+        
         "players": {
           "$uid": {
-            ".write": "auth != null && (auth.uid === $uid || auth.uid === root.child('rooms').child($pin).child('hostUid').val())",
-
-            "name": {
-              ".validate": "newData.isString() && newData.val().length <= 20"
-            },
-
-            "score": {
-              ".write": "auth.uid === root.child('rooms').child($pin).child('hostUid').val()"
-            },
-
-            "streak": {
-              ".write": "auth.uid === root.child('rooms').child($pin).child('hostUid').val()"
-            }
+            // વિદ્યાર્થી ફક્ત પોતાનું નામ અને જોઇન સ્ટેટસ લખી શકે, સ્કોર/સ્ટ્રીક સર્વર (Admin SDK) જ અપડેટ કરશે
+            ".write": "auth != null && auth.uid === $uid && !newData.child('score').exists() && !newData.child('streak').exists()"
           }
         },
-
+        
         "answers": {
           "$qIdx": {
             "$uid": {
-              ".write": "auth != null && auth.uid === $uid && !data.exists()",
-
-              ".validate": "newData.hasChildren(['ans','time'])",
-
-              "ans": {
-                ".validate": "newData.isString() && newData.val().matches(/^[abcd]$/)"
-              },
-
-              "time": {
-                ".validate": "newData.isNumber() && newData.val() <= now + 5000"
-              }
+              // ૧) ફક્ત પોતાનો જવાબ લખી શકે
+              // ૨) Double-submission રોકવા: એકવાર જવાબ લખાયા પછી બદલી ન શકાય (!data.exists())
+              // ૩) ServerValue.TIMESTAMP ફરજિયાત હોવું જોઈએ
+              ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.hasChildren(['ans', 'time'])",
+              ".validate": "newData.child('time').val() === now"
             }
           }
         }
       }
     },
-
+    
+    // serverQuiz: કોઈપણ ક્લાયન્ટ (પ્લેયર કે બ્રાઉઝર) તેને વાંચી શકશે નહીં.
+    // માત્ર Cloud Functions (Admin SDK) જ આને એક્સેસ કરી શકશે.
     "serverQuiz": {
       "$pin": {
         ".read": false,
-        ".write": "auth != null && auth.uid === root.child('rooms').child($pin).child('hostUid').val()"
+        ".write": "auth != null && root.child('rooms/' + $pin + '/hostUid').val() === auth.uid"
       }
     },
 
-    "saved_quiz_questions": {
-      ".read": "auth != null",
-      ".write": false
-    },
-
     "active_broadcast": {
-      ".read": "auth != null",
-      ".write": false
+      ".read": true,
+      ".write": "auth != null"
     }
   }
 }
