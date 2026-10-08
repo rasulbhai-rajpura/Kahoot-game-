@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kahoot Live Quiz - પૂર્ણ એડમિન કંટ્રોલ</title>
+    <title>Kahoot Live Quiz - સંપૂર્ણ સુધારેલ એડમિન કંટ્રોલ</title>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -58,8 +58,8 @@
         .p-silver { background: linear-gradient(180deg, #e0e0e0, #757575); height: 200px; order: 1; }
         .p-bronze { background: linear-gradient(180deg, #cd7f32, #8b4513); height: 150px; order: 3; }
         .crown { font-size: 42px; margin-bottom: 5px; }
-        .p-name { font-size: 18px; background: rgba(0,0,0,0.4); width: 100%; padding: 6px 0; }
-        .p-score { font-size: 15px; margin: 8px 0; }
+        .p-name { font-size: 18px; background: rgba(0,0,0,0.5); width: 100%; padding: 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .p-score { font-size: 16px; margin: 8px 0; }
 
         /* PLAYER STYLES */
         #player-view { display: none; width: 100vw; min-height: 100vh; background: #f4f6f9; color: #333; flex-direction: column; align-items: center; justify-content: flex-start; padding: 15px; }
@@ -159,19 +159,19 @@
             <div class="podium-step p-silver">
                 <div class="crown">🥈</div>
                 <div class="p-name" id="podium-2-name">-</div>
-                <div class="p-score" id="podium-2-score">0 pts</div>
+                <div class="p-score" id="podium-2-score">0 ગુણ</div>
                 <div style="font-size:24px; padding-bottom:10px;">2</div>
             </div>
             <div class="podium-step p-gold">
                 <div class="crown">👑🥇</div>
                 <div class="p-name" id="podium-1-name">-</div>
-                <div class="p-score" id="podium-1-score">0 pts</div>
+                <div class="p-score" id="podium-1-score">0 ગુણ</div>
                 <div style="font-size:30px; padding-bottom:10px;">1</div>
             </div>
             <div class="podium-step p-bronze">
                 <div class="crown">🥉</div>
                 <div class="p-name" id="podium-3-name">-</div>
-                <div class="p-score" id="podium-3-score">0 pts</div>
+                <div class="p-score" id="podium-3-score">0 ગુણ</div>
                 <div style="font-size:20px; padding-bottom:10px;">3</div>
             </div>
         </div>
@@ -192,7 +192,7 @@
     <div id="player-wait-box">
         <div id="feedback-container"></div>
         <h2 id="wait-msg" style="color:#555;">એડમિન ગેમ શરૂ કરે તેની રાહ જુઓ...</h2>
-        <div class="score-pill">તમારો સ્કોર: <span id="my-score">0</span></div>
+        <div class="score-pill">તમારો કુલ સ્કોર: <span id="my-score">0</span></div>
     </div>
 
     <!-- વિદ્યાર્થીની સ્ક્રીન પર પ્રશ્ન અને ઓપ્શન્સ -->
@@ -260,7 +260,7 @@ function verifyAdminPassword() {
 }
 
 // HOST કંટ્રોલ
-let currentQIdx = 0, timer = 30, timerInterval;
+let currentQIdx = 0, timerInterval;
 
 function openHostPanel() {
     document.getElementById('role-select-view').style.display = 'none';
@@ -272,7 +272,7 @@ function openHostPanel() {
     roomRef = db.ref('rooms/' + currentPin);
     roomRef.set({ state: "lobby", currentQuestion: -1 });
 
-    // 🟢 Firebase માંથી અગાઉથી સેવ થયેલા પ્રશ્નો ઓટોમેટિક લોડ કરો
+    // Firebase માંથી અગાઉથી સેવ થયેલા પ્રશ્નો ઓટોમેટિક લોડ કરો
     db.ref('saved_quiz_questions').once('value', snapshot => {
         if (snapshot.exists()) {
             questions = snapshot.val();
@@ -284,11 +284,13 @@ function openHostPanel() {
         }
     });
 
+    // જોડાયેલા ખેલાડીઓનું લિસ્ટ
     roomRef.child('players').on('value', snapshot => {
         const list = document.getElementById('lobby-players');
         list.innerHTML = "";
         snapshot.forEach(child => {
-            list.innerHTML += `<div class="player-badge">👤 ${child.val().name}</div>`;
+            const p = child.val();
+            list.innerHTML += `<div class="player-badge">👤 ${p.name || 'પ્લેયર'}</div>`;
         });
     });
 }
@@ -308,14 +310,6 @@ function downloadSampleExcel() {
                 "c": "મકરવૃત્ત",
                 "d": "ધ્રુવવૃત્ત",
                 "Correct Answer": "b"
-            },
-            {
-                "Question": "પૃથ્વી પોતાની ધરી પર ૧ ડિગ્રી રેખાંશ ફરતાં કેટલો સમય લે છે?",
-                "a": "૧ કલાક",
-                "b": "૧૫ મિનિટ",
-                "c": "૪ મિનિટ",
-                "d": "૪ સેકન્ડ",
-                "Correct Answer": "c"
             }
         ];
 
@@ -390,15 +384,13 @@ function handleExcelUpload(e) {
 
             if (parsed.length > 0) {
                 questions = parsed;
-                
-                // 🟢 Firebase માં પ્રશ્નો કાયમી સેવ કરી દીધા
                 db.ref('saved_quiz_questions').set(parsed);
 
                 document.getElementById('q-loaded-count').innerText = `(${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ અને સેવ થયા!)`;
                 document.getElementById('q-loaded-count').style.color = "#4caf50";
-                alert(`શાનદાર! ${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થઈ ગયા છે અને ભવિષ્ય માટે સ્ટોર પણ થઈ ગયા છે.`);
+                alert(`શાનદાર! ${questions.length} પ્રશ્નો સફળતાપૂર્વક લોડ થઈ ગયા છે.`);
             } else {
-                alert("⚠ ફાઇલ યોગ્ય રીતે વાંચી શકાઈ નથી! કૃપા કરીને કોલમ (Question, a, b, c, d, Correct Answer) ચકાસો.");
+                alert("⚠ ફાઇલ યોગ્ય રીતે વાંચી શકાઈ નથી! કૃપા કરીને કોલમ ચકાસો.");
             }
         } catch (err) {
             alert("ફાઈલ વાંચવામાં ભૂલ આવી: " + err.message);
@@ -428,26 +420,32 @@ function loadHostQuestion(idx) {
     document.getElementById('lbl-d').innerText = `■ ${q.d}`;
     document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
 
+    const startTime = Date.now();
     roomRef.update({
         state: "question",
         currentQuestion: idx,
         questionText: q.q,
         options: { a: q.a, b: q.b, c: q.c, d: q.d },
         correctAnswer: q.correct.toLowerCase().trim(),
-        questionStartTime: Date.now()
+        questionStartTime: startTime
     });
 
-    timer = 30;
-    document.getElementById('timer-val').innerText = timer;
     clearInterval(timerInterval);
+    const totalSec = 30;
+    document.getElementById('timer-val').innerText = totalSec;
+
     timerInterval = setInterval(() => {
-        timer--;
-        document.getElementById('timer-val').innerText = timer;
-        if (timer <= 0) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remain = totalSec - elapsed;
+
+        if (remain >= 0) {
+            document.getElementById('timer-val').innerText = remain;
+        } else {
             clearInterval(timerInterval);
+            document.getElementById('timer-val').innerText = "0";
             timeUpHost();
         }
-    }, 1000);
+    }, 500);
 }
 
 function timeUpHost() {
@@ -474,13 +472,19 @@ function showScores() {
 
     roomRef.child('players').once('value', snapshot => {
         let players = [];
-        snapshot.forEach(c => players.push(c.val()));
-        players.sort((a, b) => (b.score || 0) - (a.score || 0));
+        snapshot.forEach(c => {
+            const p = c.val() || {};
+            players.push({
+                name: p.name || 'પ્લેયર',
+                score: Number(p.score) || 0
+            });
+        });
+        players.sort((a, b) => b.score - a.score);
 
         const list = document.getElementById('scores-list');
         list.innerHTML = "";
         players.slice(0, 5).forEach((p, i) => {
-            list.innerHTML += `<div class="score-row"><span>#${i+1} ${p.name}</span><span>${p.score || 0} ગુણ</span></div>`;
+            list.innerHTML += `<div class="score-row"><span>#${i+1} ${p.name}</span><span>${p.score} ગુણ</span></div>`;
         });
     });
 }
@@ -497,21 +501,24 @@ function showFinalPodium() {
 
     roomRef.child('players').once('value', snapshot => {
         let players = [];
-        snapshot.forEach(c => players.push(c.val()));
-        players.sort((a, b) => (b.score || 0) - (a.score || 0));
+        snapshot.forEach(c => {
+            const val = c.val() || {};
+            players.push({
+                name: val.name || 'પ્લેયર',
+                score: Number(val.score) || 0
+            });
+        });
+        players.sort((a, b) => b.score - a.score);
 
-        if(players[0]) {
-            document.getElementById('podium-1-name').innerText = players[0].name;
-            document.getElementById('podium-1-score').innerText = (players[0].score || 0) + " ગુણ";
-        }
-        if(players[1]) {
-            document.getElementById('podium-2-name').innerText = players[1].name;
-            document.getElementById('podium-2-score').innerText = (players[1].score || 0) + " ગુણ";
-        }
-        if(players[2]) {
-            document.getElementById('podium-3-name').innerText = players[2].name;
-            document.getElementById('podium-3-score').innerText = (players[2].score || 0) + " ગુણ";
-        }
+        // ૧, ૨ અને ૩ નંબરના વિજેતાઓની ચોક્કસ ગોઠવણી
+        document.getElementById('podium-1-name').innerText = players[0] ? players[0].name : "-";
+        document.getElementById('podium-1-score').innerText = players[0] ? `${players[0].score} ગુણ` : "0 ગુણ";
+
+        document.getElementById('podium-2-name').innerText = players[1] ? players[1].name : "-";
+        document.getElementById('podium-2-score').innerText = players[1] ? `${players[1].score} ગુણ` : "0 ગુણ";
+
+        document.getElementById('podium-3-name').innerText = players[2] ? players[2].name : "-";
+        document.getElementById('podium-3-score').innerText = players[2] ? `${players[2].score} ગુણ` : "0 ગુણ";
     });
 }
 
@@ -572,18 +579,20 @@ function listenPlayerGame() {
         if (!val) return;
 
         if (val.state === "question") {
-            if (val.currentQuestion !== lastProcessedQ) {
-                lastProcessedQ = val.currentQuestion;
+            const qIdx = Number(val.currentQuestion);
+            if (qIdx !== lastProcessedQ) {
+                lastProcessedQ = qIdx;
                 hasAnswered = false;
                 currentCorrect = (val.correctAnswer || "").toString().trim().toLowerCase();
-                qStartTime = val.questionStartTime || Date.now();
+                qStartTime = Number(val.questionStartTime) || Date.now();
 
+                // તમામ બટન ફરી એક્ટિવ કરો
                 document.querySelectorAll('.player-opt-btn').forEach(btn => {
                     btn.disabled = false;
                     btn.style.opacity = '1';
                 });
 
-                document.getElementById('player-q-num').innerText = `પ્રશ્ન ${val.currentQuestion + 1}`;
+                document.getElementById('player-q-num').innerText = `પ્રશ્ન ${qIdx + 1}`;
                 document.getElementById('player-q-text').innerText = val.questionText || "પ્રશ્ન લોડ થઈ રહ્યો છે...";
                 if (val.options) {
                     document.getElementById('player-lbl-a').innerText = val.options.a || "";
@@ -616,21 +625,29 @@ function sendPlayerAnswer(selected) {
     if (hasAnswered) return;
     hasAnswered = true;
 
+    // ડબલ ક્લિકથી બચવા તાત્કાલિક લોક
     document.querySelectorAll('.player-opt-btn').forEach(btn => {
         btn.disabled = true;
     });
 
     const cleanSelected = selected.toString().trim().toLowerCase();
     const isCorrect = (cleanSelected === currentCorrect);
-    const responseSec = (Date.now() - qStartTime) / 1000;
+    
+    // સચોટ સમય અને સ્કોર ગણતરી (૧૦૦ થી ૧૦૦૦ પોઈન્ટ)
+    let responseSec = Math.max(0, (Date.now() - qStartTime) / 1000);
+    if (responseSec > 30) responseSec = 30;
 
+    let pts = 0;
     if (isCorrect) {
-        let pts = Math.max(100, Math.round(1000 - (responseSec * 25)));
+        pts = Math.round(1000 - (responseSec * 25));
+        if (pts < 200) pts = 200;
+        if (pts > 1000) pts = 1000;
+
         currentScore += pts;
         playerRoomRef.child('players/' + playerId).update({ score: currentScore });
         showPlayerFeedback(true, `સાચો જવાબ! 🌟 (+${pts})`);
     } else {
-        showPlayerFeedback(false, "ખોટો જવાબ! ❌");
+        showPlayerFeedback(false, "ખોટો જવાબ! ❌ (+0)");
     }
 
     document.getElementById('my-score').innerText = currentScore;
@@ -640,7 +657,7 @@ function sendPlayerAnswer(selected) {
         document.getElementById('player-question-container').style.display = 'none';
         document.getElementById('player-wait-box').style.display = 'block';
         document.getElementById('wait-msg').innerText = "બીજા વિદ્યાર્થીઓના જવાબની રાહ જુઓ...";
-    }, 1200);
+    }, 1000);
 }
 
 function showPlayerFeedback(isCorrect, text) {
