@@ -2,7 +2,7 @@
 <html lang="gu">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Kahoot Pro - સુરક્ષિત લાઈવ ક્વિઝ</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -15,9 +15,10 @@
 
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
   body { margin: 0; padding: 0; font-family: 'Noto Sans Gujarati', 'Segoe UI', Arial, sans-serif; background: #46178f; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow-x: hidden; font-weight: 600; }
   .container { width: 92%; max-width: 900px; padding: 15px; margin: auto; }
-  .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 17px; border-radius: 10px; cursor: pointer; font-weight: 700; margin: 0; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-family: 'Noto Sans Gujarati', sans-serif; }
+  .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 17px; border-radius: 10px; cursor: pointer; font-weight: 700; margin: 0; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-family: 'Noto Sans Gujarati', sans-serif; will-change: transform; }
   .btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
   .btn:active { transform: scale(0.96); }
   .btn-green { background: #26890c; }
@@ -257,6 +258,7 @@
   .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* ===== મોબાઈલ ===== */
   @media (max-width: 600px) {
     .podium-step { width: 30%; }
     .pin-box { font-size: 24px; padding: 10px 12px; letter-spacing: 2px; min-height: 50px; }
@@ -291,6 +293,28 @@
 
     .player-status-pill { font-size: 11px; padding: 5px 10px; }
     .live-status-container { max-height: 90px; gap: 5px; margin-top: 8px; }
+  }
+
+  /* ===== ટેબ્લેટ ===== */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    #host-game .opt { font-size: 16px; min-height: 90px; }
+    #host-game .question-card { font-size: 20px; }
+    #host-game .timer-circle { width: 64px; height: 64px; }
+    #host-game .timer-circle svg { width: 64px; height: 64px; }
+    #host-game .timer-text { font-size: 20px; }
+  }
+
+  /* ===== સ્માર્ટ બોર્ડ / મોટી સ્ક્રીન ===== */
+  @media (min-width: 1025px) {
+    #host-game .opt { font-size: 18px; min-height: 100px; padding: 16px; }
+    #host-game .question-card { font-size: 22px; padding: 18px 22px; }
+    #host-game .q-header { font-size: 22px; }
+    #host-game .timer-circle { width: 72px; height: 72px; }
+    #host-game .timer-circle svg { width: 72px; height: 72px; }
+    #host-game .timer-text { font-size: 22px; }
+    #host-game .answer-counter { font-size: 18px; padding: 8px 24px; }
+    .player-status-pill { font-size: 15px; padding: 8px 16px; }
+    .live-status-container { max-height: 150px; }
   }
 
   @media (min-width: 601px) {
@@ -684,7 +708,7 @@ function handleExcelUpload(e) {
 }
 
 function adminStartGameCommand() {
-  unlockAudio(); // ✅ Audio unlock
+  unlockAudio();
   if (!questions.length) {
     showToast("⚠ પહેલા Excel અપલોડ કરો!", 'error');
     return;
@@ -901,7 +925,7 @@ async function adminForceNextQuestion() {
 }
 
 async function adminEndGame() {
-  unlockAudio(); // ✅ Audio unlock
+  unlockAudio();
   if (!confirm("ગેમ સમાપ્ત કરવી છે?")) return;
   clearInterval(timerInterval);
   if (liveStatusInterval) clearInterval(liveStatusInterval);
@@ -996,12 +1020,10 @@ function showFinalPodium() {
   document.getElementById('host-game').style.display = 'none';
   document.getElementById('host-podium').style.display = 'block';
 
-  // ✅ Web Audio API થી વિનર સાઉન્ડ
   playWinSound();
 
-  // ✅ બેકઅપ: જૂનું audio element પણ ટ્રાય કરો
-  const winAudio = document.getElementById('sound-win');
   try {
+    const winAudio = document.getElementById('sound-win');
     winAudio.currentTime = 0;
     winAudio.volume = 0.6;
     winAudio.play().catch(()=>{});
@@ -1043,6 +1065,7 @@ let hasAnswered = false;
 let qStartTime = 0;
 let lastProcessedQ = -1;
 let answerSubmitLock = false;
+let playerQVersion = 0;  // ✅ બગ ફિક્સ માટે
 
 function initPlayer() {
   document.getElementById('role-select-view').style.display = 'none';
@@ -1126,6 +1149,7 @@ function listenPlayerGame() {
       const qIdx = Number(val.currentQuestion);
       if (qIdx !== lastProcessedQ) {
         lastProcessedQ = qIdx;
+        playerQVersion++;  // ✅ નવો પ્રશ્ન — version વધારો
         hasAnswered = false;
         answerSubmitLock = false;
         qStartTime = Number(val.questionStartTime) || Date.now();
@@ -1187,7 +1211,9 @@ function listenPlayerGame() {
       if (!hasAnswered) {
         showPlayerFeedback(false, "⏰ સમય પૂરો! જવાબ આપ્યો નથી.");
       }
+      const revealVersion = playerQVersion;
       setTimeout(() => {
+        if (playerQVersion !== revealVersion) return;  // ✅ નવો પ્રશ્ન આવ્યો — છુપાવવું નહીં
         document.getElementById('player-question-container').style.display = 'none';
         document.getElementById('player-wait-box').style.display = 'block';
         document.getElementById('wait-msg').innerText = "આગળના પ્રશ્નની રાહ જુઓ...";
@@ -1219,9 +1245,13 @@ function sendPlayerAnswer(selected) {
     time: now
   }).then(() => {
     showPlayerFeedback(true, "જવાબ સબમિટ થયો ✨");
+  }).catch(err => {
+    console.error("Answer error:", err);
   });
 
+  const answerVersion = playerQVersion;
   setTimeout(() => {
+    if (playerQVersion !== answerVersion) return;  // ✅ રક્ષણ
     document.getElementById('player-question-container').style.display = 'none';
     document.getElementById('player-wait-box').style.display = 'block';
     document.getElementById('wait-msg').innerText = "પરિણામની રાહ જુઓ...";
@@ -1245,6 +1275,7 @@ function playWinSound() {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
 
     const melody = [
       { freq: 523.25, time: 0.00, dur: 0.20 },
@@ -1283,6 +1314,7 @@ function unlockAudio() {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -1294,6 +1326,9 @@ function unlockAudio() {
     console.log("Audio unlocked");
   } catch(e) {}
 }
+
+// ડોક્યુમેન્ટ ક્લિક પર Audio unlock
+document.addEventListener('click', unlockAudio, { once: true });
 </script>
 </body>
 </html>
