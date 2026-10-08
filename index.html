@@ -16,19 +16,22 @@
 <!-- Confetti -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+<!-- Google Fonts - સ્પષ્ટ ગુજરાતી ફોન્ટ -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #46178f; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow-x: hidden; }
+  body { margin: 0; padding: 0; font-family: 'Noto Sans Gujarati', 'Segoe UI', Arial, sans-serif; background: #46178f; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow-x: hidden; font-weight: 600; }
   .container { width: 92%; max-width: 900px; padding: 15px; margin: auto; }
-  .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 0; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 17px; border-radius: 10px; cursor: pointer; font-weight: 700; margin: 0; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-family: 'Noto Sans Gujarati', sans-serif; }
   .btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
   .btn:active { transform: scale(0.96); }
   .btn-green { background: #26890c; }
   .btn-upload { background: #f39c12; }
-  .btn-broadcast { background: #e91e63; font-size: 18px; padding: 12px 22px; }
+  .btn-broadcast { background: #e91e63; font-size: 17px; padding: 12px 22px; }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  input { width: 100%; max-width: 340px; padding: 14px; margin-bottom: 12px; font-size: 18px; border: 2px solid #ccc; border-radius: 8px; text-align: center; outline: none; transition: 0.2s; }
+  input { width: 100%; max-width: 340px; padding: 14px; margin-bottom: 12px; font-size: 18px; border: 2px solid #ccc; border-radius: 10px; text-align: center; outline: none; transition: 0.2s; font-family: 'Noto Sans Gujarati', sans-serif; font-weight: 600; }
   input:focus { border-color: #46178f; box-shadow: 0 0 0 3px rgba(70,23,143,0.2); }
 
   /* ===== Creator Bar (Scrolling) ===== */
@@ -42,7 +45,7 @@
     animation: gradientMove 4s linear infinite;
     color: white;
     padding: 8px 0;
-    font-weight: bold;
+    font-weight: 800;
     font-size: 16px;
     z-index: 10000;
     overflow: hidden;
@@ -69,7 +72,7 @@
   body { padding-top: 40px; }
 
   /* Connection Status */
-  #conn-status { position: fixed; top: 42px; right: 10px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; z-index: 9999; transition: 0.3s; }
+  #conn-status { position: fixed; top: 42px; right: 10px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; z-index: 9999; transition: 0.3s; }
   .conn-on { background: #26890c; color: white; }
   .conn-off { background: #e74c3c; color: white; }
 
@@ -82,7 +85,7 @@
 
   /* Host */
   #host-view { display: none; width: 100%; }
-  .pin-box { font-size: 36px; font-weight: 900; background: white; color: #46178f; padding: 12px 22px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin: 0; letter-spacing: 4px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 3px solid #ffd700; font-family: 'Courier New', monospace; min-height: 56px; }
+  .pin-box { font-size: 36px; font-weight: 900; background: white; color: #46178f; padding: 12px 22px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin: 0; letter-spacing: 4px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); border: 3px solid #ffd700; font-family: 'Poppins', 'Courier New', monospace; min-height: 56px; }
 
   /* ===== Row Pair (જોડે જોડે બે બટન) ===== */
   .row-pair {
@@ -119,7 +122,7 @@
     color: #ffeb3b;
     padding: 12px 18px;
     border-radius: 10px;
-    font-weight: bold;
+    font-weight: 800;
     font-size: 15px;
     display: inline-flex;
     align-items: center;
@@ -147,7 +150,7 @@
     background: linear-gradient(135deg, #26890c, #4caf50) !important;
     font-size: 17px !important;
     border-radius: 10px !important;
-    font-weight: bold;
+    font-weight: 800;
     color: white;
     border: none;
     cursor: pointer;
@@ -163,82 +166,161 @@
   }
 
   .players-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 50px; margin-top: 15px; }
-  .player-badge { background: rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-size: 17px; font-weight: bold; animation: popIn 0.3s ease-out; }
+  .player-badge { background: rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-size: 16px; font-weight: 700; animation: popIn 0.3s ease-out; }
   @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
   .admin-controls { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 20px; display: flex; flex-direction: column; justify-content: center; gap: 10px; flex-wrap: wrap; }
   .admin-controls .row-pair { margin: 0; }
 
-  .question-card { background: white; color: #222; padding: 22px; border-radius: 15px; font-size: 22px; font-weight: bold; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: left; line-height: 1.4; }
-  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-  .opt { padding: 18px; font-size: 19px; font-weight: bold; color: white; border-radius: 10px; text-align: left; transition: all 0.3s; }
-  .opt-a { background: #e21b3c; }
-  .opt-b { background: #1368ce; }
-  .opt-c { background: #d89e00; }
-  .opt-d { background: #26890c; }
-  .opt.correct-highlight { outline: 6px solid #fff; transform: scale(1.03); box-shadow: 0 0 25px #fff; animation: pulse 0.6s ease-in-out; }
-  @keyframes pulse { 0%, 100% { transform: scale(1.03); } 50% { transform: scale(1.07); } }
+  /* ========== HOST GAME VIEW (Kahoot જેવું) ========== */
+  #host-game {
+    padding-top: 8px;
+  }
 
-  .score-row { background: white; color: #333; margin: 8px auto; max-width: 550px; padding: 14px 22px; border-radius: 10px; display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; box-shadow: 0 3px 10px rgba(0,0,0,0.2); animation: slideIn 0.4s ease-out; }
+  #host-game .q-progress {
+    width: 100%;
+    height: 5px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  #host-game .q-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #e91e63);
+    transition: width 0.5s;
+  }
+
+  #host-game .q-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-weight: 800;
+  }
+
+  #host-game .timer-circle { position: relative; width: 56px; height: 56px; }
+  #host-game .timer-circle svg { transform: rotate(-90deg); width: 56px; height: 56px; }
+  #host-game .timer-circle circle { fill: none; stroke-width: 6; }
+  #host-game .timer-bg { stroke: rgba(255,255,255,0.2); }
+  #host-game .timer-fg { stroke: #ffeb3b; stroke-linecap: round; transition: stroke-dashoffset 0.5s linear, stroke 0.3s; }
+  #host-game .timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 17px; font-weight: 900; color: #ffeb3b; font-family: 'Poppins', sans-serif; }
+
+  /* પ્રશ્ન કાર્ડ — નાનું અને સ્પષ્ટ */
+  #host-game .question-card {
+    background: white;
+    color: #1a1a2e;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 8px 0 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    text-align: center;
+    line-height: 1.35;
+    font-family: 'Noto Sans Gujarati', sans-serif;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ✅ 2×2 ચોરસ ગ્રીડ — Kahoot જેવું */
+  #host-game .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  #host-game .opt {
+    padding: 12px 10px;
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 76px;
+    line-height: 1.25;
+    word-break: break-word;
+    transition: all 0.3s;
+    font-family: 'Noto Sans Gujarati', sans-serif;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  }
+
+  #host-game .opt-a { background: linear-gradient(135deg, #e21b3c, #b81530); }
+  #host-game .opt-b { background: linear-gradient(135deg, #1368ce, #0f4fa0); }
+  #host-game .opt-c { background: linear-gradient(135deg, #d89e00, #b88600); }
+  #host-game .opt-d { background: linear-gradient(135deg, #26890c, #1e6b09); }
+
+  #host-game .opt.correct-highlight {
+    outline: 5px solid #fff;
+    transform: scale(1.04);
+    box-shadow: 0 0 25px #fff;
+    animation: pulse 0.6s ease-in-out;
+  }
+  @keyframes pulse { 0%, 100% { transform: scale(1.04); } 50% { transform: scale(1.08); } }
+
+  #host-game .answer-counter {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 800;
+    margin-top: 10px;
+  }
+
+  /* ========== બાકીના ========== */
+  .score-row { background: white; color: #333; margin: 8px auto; max-width: 550px; padding: 14px 22px; border-radius: 10px; display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; box-shadow: 0 3px 10px rgba(0,0,0,0.2); animation: slideIn 0.4s ease-out; }
   @keyframes slideIn { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
   /* Podium */
   .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 15px; height: 340px; margin: 30px auto; max-width: 700px; }
-  .podium-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 175px; border-radius: 15px 15px 0 0; color: white; font-weight: bold; animation: riseUp 0.8s ease-out; }
+  .podium-step { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 175px; border-radius: 15px 15px 0 0; color: white; font-weight: 800; animation: riseUp 0.8s ease-out; }
   @keyframes riseUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   .p-gold { background: linear-gradient(180deg, #ffd700, #b8860b); height: 260px; order: 2; }
   .p-silver { background: linear-gradient(180deg, #e0e0e0, #757575); height: 200px; order: 1; }
   .p-bronze { background: linear-gradient(180deg, #cd7f32, #8b4513); height: 150px; order: 3; }
   .crown { font-size: 42px; margin-bottom: 5px; }
-  .p-name { font-size: 17px; background: rgba(0,0,0,0.5); width: 100%; padding: 6px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .p-score { font-size: 16px; margin: 8px 0; }
+  .p-name { font-size: 17px; background: rgba(0,0,0,0.5); width: 100%; padding: 6px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 800; }
+  .p-score { font-size: 16px; margin: 8px 0; font-weight: 700; }
 
   /* Player */
   #player-view { display: none; width: 100vw; min-height: 100vh; background: #f4f6f9; color: #333; flex-direction: column; align-items: center; justify-content: flex-start; padding: 15px; }
   #player-login-box { margin: auto; padding: 20px; width: 100%; max-width: 360px; }
   #player-wait-box { display: none; margin: auto; padding: 25px 15px; text-align: center; width: 100%; max-width: 500px; }
-  .feedback-box { font-size: 22px; font-weight: bold; padding: 18px; border-radius: 12px; margin-bottom: 15px; animation: popIn 0.3s; }
+  .feedback-box { font-size: 20px; font-weight: 800; padding: 18px; border-radius: 12px; margin-bottom: 15px; animation: popIn 0.3s; font-family: 'Noto Sans Gujarati', sans-serif; }
 
   #player-question-container { display: none; width: 100%; max-width: 580px; margin: 10px auto; }
-  .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: bold; color: #555; }
-  .player-q-card { background: white; color: #111; padding: 20px 22px; border-radius: 14px; font-size: 19px; font-weight: bold; margin-bottom: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: left; line-height: 1.45; border-left: 6px solid #46178f; }
+  .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 800; color: #555; font-size: 15px; }
+  .player-q-card { background: white; color: #111; padding: 18px 20px; border-radius: 14px; font-size: 18px; font-weight: 700; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: left; line-height: 1.45; border-left: 6px solid #46178f; font-family: 'Noto Sans Gujarati', sans-serif; }
 
-  .player-opt-btn { width: 100%; border: none; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; font-size: 18px; font-weight: bold; color: white; display: flex; align-items: center; text-align: left; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.15s; }
+  .player-opt-btn { width: 100%; border: none; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; font-size: 17px; font-weight: 800; color: white; display: flex; align-items: center; text-align: left; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.15s; font-family: 'Noto Sans Gujarati', sans-serif; }
   .player-opt-btn:hover { filter: brightness(1.1); }
   .player-opt-btn:active { transform: scale(0.97); }
   .player-opt-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-  .shape-badge { font-size: 20px; margin-right: 14px; flex-shrink: 0; background: rgba(0,0,0,0.2); width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; }
+  .shape-badge { font-size: 20px; margin-right: 14px; flex-shrink: 0; background: rgba(0,0,0,0.2); width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 900; }
   .opt-text { flex-grow: 1; }
 
-  .score-pill { background: #333; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 18px; display: inline-block; margin-top: 15px; font-weight: bold; }
-  .streak-badge { background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; padding: 6px 16px; border-radius: 20px; font-size: 15px; font-weight: bold; margin-left: 8px; animation: pulse 1s infinite; }
-
-  /* Circular Timer */
-  .timer-circle { position: relative; width: 60px; height: 60px; }
-  .timer-circle svg { transform: rotate(-90deg); }
-  .timer-circle circle { fill: none; stroke-width: 6; }
-  .timer-bg { stroke: rgba(255,255,255,0.2); }
-  .timer-fg { stroke: #ffeb3b; stroke-linecap: round; transition: stroke-dashoffset 0.5s linear, stroke 0.3s; }
-  .timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: bold; color: #ffeb3b; }
-
-  /* Answer counter on host */
-  .answer-counter { display: inline-block; background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; font-size: 16px; font-weight: bold; margin-top: 10px; }
+  .score-pill { background: #333; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 17px; display: inline-block; margin-top: 15px; font-weight: 800; }
+  .streak-badge { background: linear-gradient(135deg, #f39c12, #e74c3c); color: white; padding: 6px 16px; border-radius: 20px; font-size: 15px; font-weight: 800; margin-left: 8px; animation: pulse 1s infinite; }
 
   /* Loading spinner */
   .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Progress bar */
-  .q-progress { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; overflow: hidden; margin-bottom: 15px; }
-  .q-progress-bar { height: 100%; background: linear-gradient(90deg, #ffd700, #e91e63); transition: width 0.5s; }
-
   /* ===== મોબાઈલ માટે ખાસ ગોઠવણી ===== */
   @media (max-width: 600px) {
-    .options-grid { grid-template-columns: 1fr; }
     .podium-step { width: 30%; }
     .pin-box { font-size: 24px; padding: 10px 12px; letter-spacing: 2px; min-height: 50px; }
     h1 { font-size: 22px !important; }
     .p-name { font-size: 14px; }
+    .player-opt-btn { font-size: 16px; padding: 14px 16px; }
+    .player-q-card { font-size: 17px; padding: 16px; }
 
     .row-pair { gap: 8px; margin: 8px 0; }
     .row-pair > * { flex: 1 1 45%; min-height: 50px; }
@@ -269,6 +351,28 @@
       font-size: 13px !important;
       padding: 10px 6px !important;
     }
+
+    /* Host Game Compact */
+    #host-game .q-header { font-size: 16px; }
+    #host-game .timer-circle { width: 48px; height: 48px; }
+    #host-game .timer-circle svg { width: 48px; height: 48px; }
+    #host-game .timer-circle circle { r: 20; }
+    #host-game .timer-text { font-size: 15px; }
+    #host-game .question-card {
+      font-size: 15px;
+      padding: 12px 14px;
+      margin: 6px 0 8px;
+      line-height: 1.3;
+      min-height: 50px;
+    }
+    #host-game .opt {
+      font-size: 12.5px;
+      padding: 10px 6px;
+      min-height: 68px;
+      line-height: 1.2;
+    }
+    #host-game .options-grid { gap: 6px; }
+    #host-game .answer-counter { font-size: 13px; padding: 5px 14px; margin-top: 8px; }
   }
 
   @media (min-width: 601px) {
@@ -347,12 +451,12 @@
 
   <div class="container" id="host-game" style="display:none;">
     <div class="q-progress"><div class="q-progress-bar" id="q-progress-bar" style="width:0%"></div></div>
-    <div style="display:flex; justify-content:space-between; align-items:center; font-size:20px; margin-bottom:10px;">
+    <div class="q-header">
       <span id="q-counter">પ્રશ્ન ૧</span>
       <div class="timer-circle">
-        <svg width="60" height="60">
-          <circle class="timer-bg" cx="30" cy="30" r="26"></circle>
-          <circle class="timer-fg" id="timer-circle-fg" cx="30" cy="30" r="26" stroke-dasharray="163.4" stroke-dashoffset="0"></circle>
+        <svg viewBox="0 0 56 56">
+          <circle class="timer-bg" cx="28" cy="28" r="24"></circle>
+          <circle class="timer-fg" id="timer-circle-fg" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="0"></circle>
         </svg>
         <div class="timer-text" id="timer-val">30</div>
       </div>
@@ -487,7 +591,7 @@ async function sha256(text) {
 
 function showToast(msg, type = 'info') {
   const t = document.createElement('div');
-  t.style.cssText = `position:fixed;top:60px;left:50%;transform:translateX(-50%);background:${type==='error'?'#e74c3c':type==='success'?'#26890c':'#333'};color:white;padding:12px 24px;border-radius:8px;font-weight:bold;z-index:99999;box-shadow:0 5px 20px rgba(0,0,0,0.3);animation:popIn 0.3s;max-width:90vw;`;
+  t.style.cssText = `position:fixed;top:60px;left:50%;transform:translateX(-50%);background:${type==='error'?'#e74c3c':type==='success'?'#26890c':'#333'};color:white;padding:12px 24px;border-radius:8px;font-weight:bold;z-index:99999;box-shadow:0 5px 20px rgba(0,0,0,0.3);animation:popIn 0.3s;max-width:90vw;font-family:'Noto Sans Gujarati',sans-serif;`;
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3000);
@@ -560,12 +664,10 @@ function openHostPanel() {
     createdAt: firebase.database.ServerValue.TIMESTAMP
   });
 
-  // Auto-cleanup after 3 hours
   setTimeout(() => {
     if (roomRef) roomRef.remove();
   }, 3 * 60 * 60 * 1000);
 
-  // Load saved questions
   db.ref('saved_quiz_questions').once('value', snap => {
     const el = document.getElementById('q-loaded-count');
     if (snap.exists()) {
@@ -578,7 +680,6 @@ function openHostPanel() {
     }
   });
 
-  // Players listener
   roomRef.child('players').on('value', snap => {
     const list = document.getElementById('lobby-players');
     list.innerHTML = "";
@@ -711,7 +812,7 @@ function loadHostQuestion(idx) {
 
   clearInterval(timerInterval);
   const totalSec = CONFIG.QUESTION_TIME;
-  const circumference = 2 * Math.PI * 26;
+  const circumference = 2 * Math.PI * 24;
   const timerCircle = document.getElementById('timer-circle-fg');
   timerCircle.style.strokeDasharray = circumference;
   document.getElementById('timer-val').innerText = totalSec;
@@ -851,7 +952,7 @@ function loadHostQuestionReview(idx) {
   document.getElementById(`lbl-${q.correct}`).classList.add('correct-highlight');
 
   document.getElementById('timer-val').innerText = "0";
-  const circumference = 2 * Math.PI * 26;
+  const circumference = 2 * Math.PI * 24;
   document.getElementById('timer-circle-fg').style.strokeDashoffset = circumference;
   document.getElementById('timer-circle-fg').style.stroke = '#e74c3c';
 
