@@ -851,62 +851,42 @@ function loadHostQuestion(idx) {
   const q = questions[idx];
   const roomRef = db.ref(`rooms/${currentPin}`);
 
-  const localStartTime = Date.now();
+  function loadHostQuestion(idx) {
+  if (!currentPin || !questions || !questions[idx]) {
+    alert("આ પ્રશ્ન ઉપલબ્ધ નથી.");
+    return;
+  }
+
+  const q = questions[idx];
+  currentQIdx = idx;
 
   const questionData = {
     state: "question",
     currentQuestion: idx,
-
-    questionText: q.question || "",
+    questionText: q.q,
     options: {
-      a: q.a || q.option1 || "",
-      b: q.b || q.option2 || "",
-      c: q.c || q.option3 || "",
-      d: q.d || q.option4 || ""
+      a: q.a,
+      b: q.b,
+      c: q.c,
+      d: q.d
     },
-
     questionDuration: CONFIG.QUESTION_TIME,
-
-    // Firebase Server Time
     questionStartTime: firebase.database.ServerValue.TIMESTAMP,
-
-    // દરેક પ્રશ્નનો અલગ server start timestamp
-    [`questionStarts/${idx}`]:
-      firebase.database.ServerValue.TIMESTAMP,
-
-    // અગાઉના close time ને દૂર કરો
-    [`questionClosedAt/${idx}`]: null,
-
-    // Correct answer host/player side પર broadcast નહીં થાય
     correctAnswer: null
   };
 
   roomRef.update(questionData)
     .then(() => {
-
-      // Local timer માટે જ local time.
-      // Server validation માટે Firebase timestamp ઉપયોગમાં લેવાશે.
-      qStartTime = localStartTime;
-
-      currentQuestionIndex = idx;
-
       renderHostQuestion(q, idx);
-
       startHostTimer(CONFIG.QUESTION_TIME);
-
-      console.log(
-        "Question started:",
-        currentPin,
-        "Question:",
-        idx
-      );
-
+      listenHostAnswers(idx);
     })
     .catch((error) => {
       console.error("Question start error:", error);
       alert("પ્રશ્ન શરૂ કરવામાં સમસ્યા આવી.");
     });
 }
+
 
 async function timeUpHost() {
   clearInterval(timerInterval);
