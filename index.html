@@ -1342,44 +1342,74 @@ function listenPlayerGame() {
   });
 }
 
+
 function sendPlayerAnswer(selected) {
-  if (hasAnswered || answerSubmitLock) return;
-  answerSubmitLock = true;
-  hasAnswered = true;
+  if (!currentPin || !playerId) return;
 
-  document.querySelectorAll('.player-opt-btn').forEach(btn => btn.disabled = true);
+  // એક જ પ્રશ્નનો જવાબ બીજી વખત મોકલવો નહીં
+  if (playerAnswered) return;
 
-  const cleanSelected = selected.toString().trim().toLowerCase();
-  const now = Date.now();
+  // માત્ર a/b/c/d જ માન્ય
+  selected = String(selected || "").toLowerCase().trim();
 
-  playerRoomRef.child(`answers/${lastProcessedQ}/${playerId}`).set({
-    ans: cleanSelected,
-    time: now
-  }).then(() => {
-    showPlayerFeedback(true, "જવાબ સબમિટ થયો ✨");
-  }).catch(err => {
-    console.error("Answer error:", err);
-  });
-
-  const answerVersion = playerQVersion;
-  setTimeout(() => {
-    if (playerQVersion !== answerVersion) return;  // ✅ રક્ષણ
-    document.getElementById('player-question-container').style.display = 'none';
-    document.getElementById('player-wait-box').style.display = 'block';
-    document.getElementById('wait-msg').innerText = "પરિણામની રાહ જુઓ...";
-  }, 800);
-}
-
-function showPlayerFeedback(isCorrect, text) {
-  const box = document.getElementById('feedback-container');
-  box.innerHTML = `<div class="feedback-box" style="background:${isCorrect ? '#26890c' : '#e74c3c'}; color:white;">${text}</div>`;
-
-  if (isCorrect) {
-    document.getElementById('sound-correct').play().catch(()=>{});
-    confetti({ particleCount: 30, spread: 60, origin: { y: 0.7 } });
-  } else {
-    document.getElementById('sound-wrong').play().catch(()=>{});
+  if (!/^[abcd]$/.test(selected)) {
+    console.warn("Invalid answer:", selected);
+    return;
   }
+
+  const qIdx = Number(lastProcessedQ);
+
+  if (!Number.isInteger(qIdx) || qIdx < 0) {
+    console.warn("Invalid question index:", qIdx);
+    return;
+  }
+
+  const answerRef = db.ref(
+    `rooms/${currentPin}/answers/${qIdx}/${playerId}`
+  );
+
+  playerAnswered = true;
+
+  /*
+   * મહત્વપૂર્ણ:
+   * Date.now() ના બદલે Firebase ServerValue.TIMESTAMP.
+   *
+   * તેથી answer time server દ્વારા નક્કી થશે.
+   * Client પોતાની clock બદલીને extra time મેળવી શકશે નહીં.
+   */
+  const answerData = {
+    ans: selected,
+    time: firebase.database.ServerValue.TIMESTAMP
+  };
+
+  answerRef.set(answerData)
+    .then(() => {
+
+      console.log(
+        "Answer submitted:",
+        currentPin,
+        qIdx,
+        selected
+      );
+
+      showPlayerFeedback(selected);
+
+    })
+    .catch((error) => {
+
+      console.error(
+        "Answer submission error:",
+        error
+      );
+
+      /*
+       * જો Firebase Rules અથવા networkને કારણે answer
+       * save ન થાય તો player ફરી પ્રયાસ કરી શકે.
+       */
+      playerAnswered = false;
+
+      alert("જવાબ મોકલવામાં સમસ્યા આવી. ફરી પ્રયાસ કરો.");
+    });
 }
 
 /* ===== ✅ વિનર સાઉન્ડ (Web Audio API) ===== */
