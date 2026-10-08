@@ -31,8 +31,46 @@
   input { width: 100%; max-width: 340px; padding: 14px; margin-bottom: 12px; font-size: 18px; border: 2px solid #ccc; border-radius: 8px; text-align: center; outline: none; transition: 0.2s; }
   input:focus { border-color: #46178f; box-shadow: 0 0 0 3px rgba(70,23,143,0.2); }
 
+  /* ===== Creator Bar (Scrolling) ===== */
+  #creator-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(90deg, #e91e63, #ff5722, #ffd700, #e91e63);
+    background-size: 300% 100%;
+    animation: gradientMove 4s linear infinite;
+    color: white;
+    padding: 8px 0;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 10000;
+    overflow: hidden;
+    white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    letter-spacing: 1px;
+  }
+  #creator-bar .marquee {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scrollLeft 15s linear infinite;
+  }
+  #creator-bar .star { color: #ffd700; margin: 0 8px; }
+  @keyframes scrollLeft {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  /* Body ત્યાં સુધી ખસેડો જેટલી creator bar ની ઊંચાઈ છે */
+  body { padding-top: 40px; }
+
   /* Connection Status */
-  #conn-status { position: fixed; top: 10px; right: 10px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; z-index: 9999; transition: 0.3s; }
+  #conn-status { position: fixed; top: 42px; right: 10px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; z-index: 9999; transition: 0.3s; }
   .conn-on { background: #26890c; color: white; }
   .conn-off { background: #e74c3c; color: white; }
 
@@ -125,6 +163,19 @@
 </head>
 <body>
 
+<!-- ===== Creator Bar (Scrolling) ===== -->
+<div id="creator-bar">
+  <span class="marquee">
+    <span class="star">⭐</span> Created by Rasulbhai Rajpura <span class="star">⭐</span>
+    &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
+    <span class="star">⭐</span> Created by Rasulbhai Rajpura <span class="star">⭐</span>
+    &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
+    <span class="star">⭐</span> Created by Rasulbhai Rajpura <span class="star">⭐</span>
+    &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;
+    <span class="star">⭐</span> Created by Rasulbhai Rajpura <span class="star">⭐</span>
+  </span>
+</div>
+
 <audio id="sound-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
 <audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3" preload="auto"></audio>
 <audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3" preload="auto"></audio>
@@ -189,6 +240,7 @@
     <div class="answer-counter" id="answer-counter">📊 જવાબ: 0</div>
 
     <div class="admin-controls">
+      <button class="btn" style="background:#607d8b;" onclick="adminPrevQuestion()">⏮️ પાછળનો પ્રશ્ન</button>
       <button class="btn btn-upload" onclick="showScores()">📊 સ્કોરબોર્ડ</button>
       <button class="btn btn-green" onclick="adminForceNextQuestion()">⏩ આગળનો પ્રશ્ન</button>
       <button class="btn" style="background:#e74c3c;" onclick="adminEndGame()">🛑 ગેમ સમાપ્ત</button>
@@ -303,7 +355,7 @@ async function sha256(text) {
 
 function showToast(msg, type = 'info') {
   const t = document.createElement('div');
-  t.style.cssText = `position:fixed;top:20px;left:50%;transform:translateX(-50%);background:${type==='error'?'#e74c3c':type==='success'?'#26890c':'#333'};color:white;padding:12px 24px;border-radius:8px;font-weight:bold;z-index:99999;box-shadow:0 5px 20px rgba(0,0,0,0.3);animation:popIn 0.3s;`;
+  t.style.cssText = `position:fixed;top:60px;left:50%;transform:translateX(-50%);background:${type==='error'?'#e74c3c':type==='success'?'#26890c':'#333'};color:white;padding:12px 24px;border-radius:8px;font-weight:bold;z-index:99999;box-shadow:0 5px 20px rgba(0,0,0,0.3);animation:popIn 0.3s;`;
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 3000);
@@ -634,6 +686,64 @@ function adminEndGame() {
   showFinalPodium();
 }
 
+/* ================= ⏮️ PREVIOUS QUESTION (REVIEW MODE) ================= */
+function adminPrevQuestion() {
+  // પહેલા પ્રશ્ન હોય તો કંઈ ન કરો
+  if (currentQIdx <= 0) {
+    showToast("⚠️ આ પહેલો પ્રશ્ન છે!", 'error');
+    return;
+  }
+
+  clearInterval(timerInterval);
+  if (hostAnswersRef) hostAnswersRef.off();
+
+  // એક પ્રશ્ન પાછળ જાઓ
+  currentQIdx = currentQIdx - 1;
+
+  // Leaderboard બંધ કરો જો ખુલ્લું હોય
+  document.getElementById('host-leaderboard').style.display = 'none';
+  document.getElementById('host-game').style.display = 'block';
+
+  loadHostQuestionReview(currentQIdx);
+}
+
+function loadHostQuestionReview(idx) {
+  currentQIdx = idx;
+  const q = questions[idx];
+
+  document.getElementById('q-counter').innerText =
+    `પ્રશ્ન ${idx + 1} / ${questions.length} (રિવ્યુ)`;
+  document.getElementById('q-text').innerText = q.q;
+  document.getElementById('lbl-a').innerText = `▲ ${q.a}`;
+  document.getElementById('lbl-b').innerText = `◆ ${q.b}`;
+  document.getElementById('lbl-c').innerText = `● ${q.c}`;
+  document.getElementById('lbl-d').innerText = `■ ${q.d}`;
+
+  // સાચો જવાબ હાઈલાઈટ કરો
+  document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
+  document.getElementById(`lbl-${q.correct}`).classList.add('correct-highlight');
+
+  // ટાઈમર 0 બતાવો
+  document.getElementById('timer-val').innerText = "0";
+  const circumference = 2 * Math.PI * 26;
+  document.getElementById('timer-circle-fg').style.strokeDashoffset = circumference;
+  document.getElementById('timer-circle-fg').style.stroke = '#e74c3c';
+
+  // ✅ Review mode — state "review" મોકલો, પ્લેયર્સ જવાબ ન આપી શકે
+  roomRef.update({
+    state: "review",
+    currentQuestion: idx,
+    questionText: q.q,
+    options: { a: q.a, b: q.b, c: q.c, d: q.d },
+    correctAnswer: q.correct,
+    reviewMode: true
+  });
+
+  document.getElementById('answer-counter').innerText = `🔍 રિવ્યુ મોડ`;
+
+  showToast("📖 રિવ્યુ મોડ — પ્લેયર્સ ફક્ત જોઈ શકશે", 'info');
+}
+
 function showScores() {
   clearInterval(timerInterval);
   document.getElementById('host-game').style.display = 'none';
@@ -782,6 +892,8 @@ function listenPlayerGame() {
         document.querySelectorAll('.player-opt-btn').forEach(btn => {
           btn.disabled = false;
           btn.style.opacity = '1';
+          btn.style.outline = 'none';
+          btn.style.transform = 'none';
         });
 
         document.getElementById('player-q-num').innerText = `પ્રશ્ન ${qIdx + 1}`;
@@ -796,6 +908,42 @@ function listenPlayerGame() {
         document.getElementById('player-wait-box').style.display = 'none';
         document.getElementById('player-question-container').style.display = 'block';
       }
+    }
+    else if (val.state === "review") {
+      // ✅ REVIEW MODE — પ્લેયર્સ ફક્ત જોઈ શકે, જવાબ ન આપી શકે
+      const qIdx = Number(val.currentQuestion);
+      document.getElementById('player-q-num').innerText = `પ્રશ્ન ${qIdx + 1} (રિવ્યુ)`;
+      document.getElementById('player-q-text').innerText = val.questionText || "";
+
+      if (val.options) {
+        document.getElementById('player-lbl-a').innerText = val.options.a || "";
+        document.getElementById('player-lbl-b').innerText = val.options.b || "";
+        document.getElementById('player-lbl-c').innerText = val.options.c || "";
+        document.getElementById('player-lbl-d').innerText = val.options.d || "";
+      }
+
+      // બધા બટન બંધ + ઓછા દેખાય
+      document.querySelectorAll('.player-opt-btn').forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.outline = 'none';
+        btn.style.transform = 'none';
+      });
+
+      // સાચો જવાબ હાઈલાઈટ
+      const correctKey = (val.correctAnswer || "").toLowerCase();
+      const keyMap = { 'a': '1', 'b': '2', 'c': '3', 'd': '4' };
+      const correctBtn = document.querySelector(`.player-opt-btn[data-key="${keyMap[correctKey]}"]`);
+      if (correctBtn) {
+        correctBtn.style.opacity = '1';
+        correctBtn.style.outline = '4px solid #ffd700';
+        correctBtn.style.transform = 'scale(1.03)';
+      }
+
+      document.getElementById('player-wait-box').style.display = 'none';
+      document.getElementById('player-question-container').style.display = 'block';
+      document.getElementById('feedback-container').innerHTML =
+        `<div class="feedback-box" style="background:#607d8b;">📖 રિવ્યુ — સાચો જવાબ 🟡 પીળા બોર્ડરમાં છે</div>`;
     }
     else if (val.state === "reveal") {
       // Show correct answer feedback
