@@ -1,0 +1,67 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "rooms": {
+      "$pin": {
+        ".read": "auth != null",
+
+        ".write": "auth != null && ((!data.exists() && newData.child('hostUid').val() === auth.uid) || (data.exists() && data.child('hostUid').val() === auth.uid))",
+
+        "players": {
+          "$uid": {
+            ".write": "auth != null && (auth.uid === $uid || auth.uid === root.child('rooms').child($pin).child('hostUid').val())",
+
+            "name": {
+              ".validate": "newData.isString() && newData.val().length <= 20"
+            },
+
+            "score": {
+              ".write": "auth.uid === root.child('rooms').child($pin).child('hostUid').val()"
+            },
+
+            "streak": {
+              ".write": "auth.uid === root.child('rooms').child($pin).child('hostUid').val()"
+            }
+          }
+        },
+
+        "answers": {
+          "$qIdx": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && !data.exists()",
+
+              ".validate": "newData.hasChildren(['ans','time'])",
+
+              "ans": {
+                ".validate": "newData.isString() && newData.val().matches(/^[abcd]$/)"
+              },
+
+              "time": {
+                ".validate": "newData.isNumber() && newData.val() <= now + 5000"
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "serverQuiz": {
+      "$pin": {
+        ".read": false,
+        ".write": "auth != null && auth.uid === root.child('rooms').child($pin).child('hostUid').val()"
+      }
+    },
+
+    "saved_quiz_questions": {
+      ".read": "auth != null",
+      ".write": false
+    },
+
+    "active_broadcast": {
+      ".read": "auth != null",
+      ".write": false
+    }
+  }
+}
