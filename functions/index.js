@@ -1,352 +1,105 @@
-const { onValueCreated } = require("firebase-functions/v2/database");
-const { onSchedule } = require("firebase-functions/v2/scheduler");
+const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-
 admin.initializeApp();
 
 const db = admin.database();
 
-const REGION = "asia-south1";
-
-/*
- * ============================================================
- * KAHOOT PRO - SECURE SERVER
- * ============================================================
- * 1. Server-side score validation
- * 2. Answer timeout validation
- * 3. Double-score protection
- * 4. Atomic score update
- * 5. Room-specific questions
- * 6. Expired room cleanup
- * ============================================================
- */
-
-
 /**
- * ------------------------------------------------------------
- * PROCESS PLAYER ANSWER
- * ------------------------------------------------------------
- *
- * Trigger:
- * /rooms/{pin}/answers/{qIdx}/{uid}
- *
- * Player answer is received by Firebase.
- * Score is calculated ONLY on the server.
+ * સુધારો ૨, ૩, ૪ અને ૭:
+ * જ્યારે કોઈ વિદ્યાર્થી નવો જવાબ સબમિટ કરે ત્યારે આ ફંક્શન ટ્રિગર થાય છે.
  */
-exports.processQuizAnswer = onValueCreated(
-  {
-    ref: "/rooms/{pin}/answers/{qIdx}/{uid}",
-    region: REGION
-  },
-  async (event) => {
-    const pin = event.params.pin;
-    const qIdx = event.params.qIdx;
-    const uid = event.params.uid;
+exports.validateAndScoreAnswer = functions.database
+  .ref("/rooms/{pin}/answers/{qIdx}/{uid}")
+  .onCreate(async (snapshot, context) => {
+    const { pin, qIdx, uid } = context.params;
+    const answerData = snapshot.val();
+    const studentAns = (answerData.ans || "").toLowerCase().trim();
+    const answerSubmittedAt = answerData.time; // Server timestamp
 
-    const answerData = event.data.val();
+    const roomRef = db.ref(`rooms/${pin}`);
+    const quizRef = db.ref(`serverQuiz/${pin}/questions/${qIdx}`);
 
-    if (!answerData) {
+    const [roomSnap, quizSnap] = await Promise.all([
+      roomRef.once("value"),
+      quizRef.once("value")
+    ]);
+
+    const room = roomSnap.val();
+    const quizItem = quizSnap.val();
+
+    if (!room || !quizItem) return null;
+
+    // ૧. Timeout Validation: પ્રશ્ન બંધ થઈ ગયો છે કે સમય સમાપ્ત થયો છે?
+    const qStartTime = room.questionStarts ? room.questionStarts[qIdx] : null;
+    const qClosedAt = room.questionClosedAt ? room.questionClosedAt[qIdx] : null;
+    const durationMs = (room.questionDuration || 30) * 1000;
+
+    // જો હોસ્ટે પ્રશ્ન બંધ કરી દીધો હોય અથવા સમય મર્યાદા વટાવી ગઈ હોય તો જવાબ અમાન્ય
+    if (qClosedAt && answerSubmittedAt > qClosedAt) {
+      console.log(`[Rejected] Late submission by ${uid} for Q${qIdx}`);
+      return null;
+    }
+    if (qStartTime && (answerSubmittedAt - qStartTime > durationMs + 2000)) { // 2s નેટવર્ક ગ્રેસ ટાઇમ
+      console.log(`[Rejected] Timeout by ${uid} for Q${qIdx}`);
       return null;
     }
 
-    try {
-      const roomRef = db.ref(`rooms/${pin}`);
-      const playerRef = db.ref(`rooms/${pin}/players/${uid}`);
-      const questionRef = db.ref(`serverQuiz/${pin}/questions/${qIdx}`);
-      const processedRef = db.ref(
-        `rooms/${pin}/processedQuestions/${qIdx}/${uid}`
-      );
+    const isCorrect = studentAns === (quizItem.correct || "").toLowerCase().trim();
 
-      const [roomSnap, playerSnap, questionSnap, processedSnap] =
-        await Promise.all([
-          roomRef.once("value"),
-          playerRef.once("value"),
-          questionRef.once("value"),
-          processedRef.once("value")
-        ]);
+    // ૨. Double-Score Protection & Atomic Update:
+    // Firebase Transaction વડે ખાતરી કરીએ કે સ્કોર sequential અને overwrite વગર અપડેટ થાય
+    const playerRef = db.ref(`rooms/${pin}/players/${uid}`);
+    
+    return playerRef.transaction((player) => {
+      if (!player) return player;
 
-      const room = roomSnap.val();
-      const player = playerSnap.val();
-      const question = questionSnap.val();
-
-      if (!room || !player || !question) {
-        console.log("Invalid room/player/question:", pin, uid, qIdx);
-        return null;
+      // ડબલ પ્રોસેસિંગ રોકવા
+      player.processedQuestions = player.processedQuestions || {};
+      if (player.processedQuestions[qIdx]) {
+        return; // જો આ પ્રશ્ન પહેલેથી પ્રોસેસ થઈ ગયો હોય તો સ્કોર ન બદલો
       }
 
-      /*
-       * --------------------------------------------------------
-       * DOUBLE SCORE PROTECTION
-       * --------------------------------------------------------
-       */
-      if (processedSnap.exists()) {
-        console.log("Answer already processed:", pin, qIdx, uid);
-        return null;
-      }
-
-      /*
-       * --------------------------------------------------------
-       * CHECK CURRENT QUESTION
-       * --------------------------------------------------------
-       */
-      const currentQuestion = Number(room.currentQuestion);
-
-      if (currentQuestion !== Number(qIdx)) {
-        console.log("Old question answer rejected:", pin, qIdx);
-        return null;
-      }
-
-      /*
-       * --------------------------------------------------------
-       * CHECK GAME STATE
-       * --------------------------------------------------------
-       */
-      const state = room.state || "";
-
-      if (
-        state !== "question" &&
-        state !== "asking" &&
-        state !== "active"
-      ) {
-        console.log("Question is not active:", pin, state);
-        return null;
-      }
-
-      /*
-       * --------------------------------------------------------
-       * SERVER QUESTION START TIME
-       * --------------------------------------------------------
-       */
-      const questionStartTime = Number(room.questionStartTime || 0);
-
-      if (!questionStartTime) {
-        console.log("Missing question start time:", pin);
-        return null;
-      }
-
-      /*
-       * --------------------------------------------------------
-       * QUESTION TIME LIMIT
-       * --------------------------------------------------------
-       */
-      const duration = Number(
-        room.questionDuration ||
-        room.duration ||
-        question.duration ||
-        30
-      );
-
-      const now = Date.now();
-
-      const elapsed = now - questionStartTime;
-
-      /*
-       * --------------------------------------------------------
-       * TIMEOUT VALIDATION
-       * --------------------------------------------------------
-       */
-      if (elapsed > duration * 1000) {
-        console.log("Late answer rejected:", {
-          pin,
-          qIdx,
-          uid,
-          elapsed,
-          duration
-        });
-
-        /*
-         * Mark as processed so the same late answer
-         * cannot repeatedly trigger processing.
-         */
-        await processedRef.set({
-          accepted: false,
-          reason: "timeout",
-          processedAt: admin.database.ServerValue.TIMESTAMP
-        });
-
-        return null;
-      }
-
-      /*
-       * --------------------------------------------------------
-       * VALIDATE ANSWER
-       * --------------------------------------------------------
-       */
-      const submittedAnswer = String(answerData.ans || "")
-        .trim()
-        .toLowerCase();
-
-      if (!/^[abcd]$/.test(submittedAnswer)) {
-        console.log("Invalid answer:", submittedAnswer);
-        return null;
-      }
-
-      /*
-       * --------------------------------------------------------
-       * CORRECT ANSWER
-       *
-       * The correct answer comes from serverQuiz,
-       * NOT from the public room data.
-       * --------------------------------------------------------
-       */
-      const correctAnswer = String(
-        question.correctAnswer ||
-        question.correct ||
-        question.answer ||
-        ""
-      )
-        .trim()
-        .toLowerCase();
-
-      if (!/^[abcd]$/.test(correctAnswer)) {
-        console.log("Invalid server correct answer:", pin, qIdx);
-        return null;
-      }
-
-      /*
-       * --------------------------------------------------------
-       * SCORE CALCULATION
-       * --------------------------------------------------------
-       */
-
-      const isCorrect = submittedAnswer === correctAnswer;
-
-      let points = 0;
-      let newStreak = Number(player.streak || 0);
+      player.processedQuestions[qIdx] = true;
 
       if (isCorrect) {
-        /*
-         * Speed score:
-         * Maximum = 1000
-         * Minimum correct score = 100
-         */
-        const remaining =
-          Math.max(
-            0,
-            duration * 1000 - elapsed
-          );
-
-        const speedRatio =
-          duration > 0
-            ? remaining / (duration * 1000)
-            : 0;
-
-        points = Math.round(
-          100 +
-          900 * Math.max(0, Math.min(1, speedRatio))
-        );
-
-        newStreak += 1;
+        player.streak = (player.streak || 0) + 1;
+        // ઝડપી જવાબ માટે પોઈન્ટ્સ ગણતરી (લઘુત્તમ ૨૦૦, મહત્તમ ૧૦૦૦)
+        const timeTakenMs = qStartTime ? Math.max(0, answerSubmittedAt - qStartTime) : 0;
+        const timeFactor = Math.max(0, (durationMs - timeTakenMs) / durationMs);
+        const basePoints = Math.round(200 + (800 * timeFactor));
+        const streakBonus = player.streak > 1 ? 100 : 0;
+        
+        player.score = (player.score || 0) + basePoints + streakBonus;
       } else {
-        newStreak = 0;
-        points = 0;
+        player.streak = 0;
       }
 
-      /*
-       * --------------------------------------------------------
-       * ATOMIC SCORE UPDATE
-       * --------------------------------------------------------
-       *
-       * Firebase transaction prevents two simultaneous
-       * updates from overwriting each other.
-       */
-      await playerRef.transaction((currentPlayer) => {
-        if (!currentPlayer) {
-          return currentPlayer;
-        }
-
-        const oldScore = Number(currentPlayer.score || 0);
-
-        /*
-         * Extra protection:
-         * If this question was already recorded in the player
-         * object, do not add points again.
-         */
-        const lastQuestion =
-          currentPlayer.lastProcessedQuestion;
-
-        if (String(lastQuestion) === String(qIdx)) {
-          return;
-        }
-
-        currentPlayer.score = oldScore + points;
-        currentPlayer.streak = newStreak;
-
-        currentPlayer.lastCorrect = isCorrect;
-        currentPlayer.lastPoints = points;
-        currentPlayer.lastProcessedQuestion = String(qIdx);
-
-        return currentPlayer;
-      });
-
-      /*
-       * --------------------------------------------------------
-       * MARK ANSWER AS PROCESSED
-       * --------------------------------------------------------
-       */
-      await processedRef.set({
-        accepted: true,
-        correct: isCorrect,
-        points: points,
-        processedAt: admin.database.ServerValue.TIMESTAMP
-      });
-
-      console.log("Answer processed successfully:", {
-        pin,
-        qIdx,
-        uid,
-        isCorrect,
-        points
-      });
-
-      return null;
-
-    } catch (error) {
-      console.error(
-        "processQuizAnswer error:",
-        error
-      );
-
-      return null;
-    }
-  }
-);
-
+      return player;
+    });
+  });
 
 /**
- * ------------------------------------------------------------
- * CLEANUP EXPIRED ROOMS
- * ------------------------------------------------------------
- *
- * Runs every 30 minutes.
+ * સુધારો ૬: Automatic Cleanup
+ * દર ૧ કલાકે આપમેળે ચાલે અને 3 કલાક કરતાં જૂના Expired રૂમ્સ અને પ્રશ્નો ડિલીટ કરે.
  */
-exports.cleanupExpiredRooms = onSchedule(
-  {
-    schedule: "every 30 minutes",
-    timeZone: "Asia/Kolkata",
-    region: REGION
-  },
-  async () => {
-    try {
-      const roomsSnap = await db.ref("rooms").once("value");
+exports.autoCleanupExpiredRooms = functions.pubsub
+  .schedule("every 1 hours")
+  .onRun(async (context) => {
+    const now = Date.now();
+    const roomsSnap = await db.ref("rooms").once("value");
+    
+    if (!roomsSnap.exists()) return null;
 
-      if (!roomsSnap.exists()) {
-        console.log("No rooms found.");
-        return null;
+    const deletions = [];
+    roomsSnap.forEach((child) => {
+      const room = child.val();
+      const pin = child.key;
+      if (room.expiresAt && room.expiresAt < now) {
+        deletions.push(db.ref(`rooms/${pin}`).remove());
+        deletions.push(db.ref(`serverQuiz/${pin}`).remove());
+        console.log(`[Cleanup] Deleted expired room: ${pin}`);
       }
+    });
 
-      const rooms = roomsSnap.val();
-      const now = Date.now();
-
-      const updates = {};
-
-      Object.keys(rooms).forEach((pin) => {
-        const room = rooms[pin];
-
-        if (!room) {
-          return;
-        }
-
-        const expiresAt = Number(room.expiresAt || 0);
-
-        if (expiresAt > 0 && expires
+    return Promise.all(deletions);
+  });
