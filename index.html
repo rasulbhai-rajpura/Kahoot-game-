@@ -840,76 +840,72 @@ function adminStartGameCommand() {
     }
   }, 2000);
 }
-
 function loadHostQuestion(idx) {
-  currentQIdx = idx;
+  if (!currentPin) return;
+
+  if (!questions || !questions[idx]) {
+    alert("આ પ્રશ્ન ઉપલબ્ધ નથી.");
+    return;
+  }
+
   const q = questions[idx];
-  currentAnswerCount = 0;
+  const roomRef = db.ref(`rooms/${currentPin}`);
 
-  document.getElementById('q-counter').innerText = `પ્રશ્ન ${idx + 1} / ${questions.length}`;
-  document.getElementById('q-text').innerText = q.q;
-  document.getElementById('lbl-a').innerText = `▲ ${q.a}`;
-  document.getElementById('lbl-b').innerText = `◆ ${q.b}`;
-  document.getElementById('lbl-c').innerText = `● ${q.c}`;
-  document.getElementById('lbl-d').innerText = `■ ${q.d}`;
-  document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
-  document.getElementById('answer-counter').innerText = `📊 જવાબ: 0`;
+  const localStartTime = Date.now();
 
-  const progress = ((idx) / questions.length) * 100;
-  document.getElementById('q-progress-bar').style.width = progress + '%';
-
-  const startTime = Date.now();
-  roomRef.update({
+  const questionData = {
     state: "question",
     currentQuestion: idx,
-    questionText: q.q,
-    options: { a: q.a, b: q.b, c: q.c, d: q.d },
-    questionStartTime: startTime,
-    questionDuration: CONFIG.QUESTION_TIME
-  });
 
-  roomRef.child('answers/' + idx).remove();
+    questionText: q.question || "",
+    options: {
+      a: q.a || q.option1 || "",
+      b: q.b || q.option2 || "",
+      c: q.c || q.option3 || "",
+      d: q.d || q.option4 || ""
+    },
 
-  if (hostAnswersRef) hostAnswersRef.off();
-  hostAnswersRef = roomRef.child('answers/' + idx);
-  hostAnswersRef.on('value', snap => {
-    const count = snap.numChildren();
-    currentAnswerCount = count;
-    document.getElementById('answer-counter').innerText = `📊 જવાબ: ${count}`;
-    renderLivePlayersStatus();
-  });
+    questionDuration: CONFIG.QUESTION_TIME,
 
-  clearInterval(timerInterval);
-  const totalSec = CONFIG.QUESTION_TIME;
-  const circumference = 2 * Math.PI * 24;
-  const timerCircle = document.getElementById('timer-circle-fg');
-  timerCircle.style.strokeDasharray = circumference;
-  document.getElementById('timer-val').innerText = totalSec;
-  document.getElementById('timer-val').style.color = '#ffeb3b';
-  timerCircle.style.stroke = '#ffeb3b';
+    // Firebase Server Time
+    questionStartTime: firebase.database.ServerValue.TIMESTAMP,
 
-  timerInterval = setInterval(() => {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    const remain = totalSec - elapsed;
-    if (remain >= 0) {
-      document.getElementById('timer-val').innerText = remain;
-      const offset = circumference * (1 - remain / totalSec);
-      timerCircle.style.strokeDashoffset = offset;
+    // દરેક પ્રશ્નનો અલગ server start timestamp
+    [`questionStarts/${idx}`]:
+      firebase.database.ServerValue.TIMESTAMP,
 
-      if (remain <= 5) {
-        timerCircle.style.stroke = '#e74c3c';
-        document.getElementById('timer-val').style.color = '#e74c3c';
-      } else if (remain <= 10) {
-        timerCircle.style.stroke = '#f39c12';
-        document.getElementById('timer-val').style.color = '#f39c12';
-      }
-    } else {
-      clearInterval(timerInterval);
-      timeUpHost();
-    }
-  }, 500);
+    // અગાઉના close time ને દૂર કરો
+    [`questionClosedAt/${idx}`]: null,
 
-  setTimeout(renderLivePlayersStatus, 300);
+    // Correct answer host/player side પર broadcast નહીં થાય
+    correctAnswer: null
+  };
+
+  roomRef.update(questionData)
+    .then(() => {
+
+      // Local timer માટે જ local time.
+      // Server validation માટે Firebase timestamp ઉપયોગમાં લેવાશે.
+      qStartTime = localStartTime;
+
+      currentQuestionIndex = idx;
+
+      renderHostQuestion(q, idx);
+
+      startHostTimer(CONFIG.QUESTION_TIME);
+
+      console.log(
+        "Question started:",
+        currentPin,
+        "Question:",
+        idx
+      );
+
+    })
+    .catch((error) => {
+      console.error("Question start error:", error);
+      alert("પ્રશ્ન શરૂ કરવામાં સમસ્યા આવી.");
+    });
 }
 
 async function timeUpHost() {
