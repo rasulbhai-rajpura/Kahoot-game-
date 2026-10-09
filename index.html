@@ -16,7 +16,7 @@
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-  body { margin: 0; padding: 0; font-family: 'Noto Sans Gujarati', 'Segoe UI', Arial, sans-serif; background: #46178f; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow-x: hidden; font-weight: 600; }
+  body { margin: 0; padding: 0; font-family: 'Noto Sans Gujarati', 'Segoe UI', Arial, sans-serif; background: #46178f; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; overflow-x: hidden; font-weight: 600; padding-top: 40px; }
   .container { width: 92%; max-width: 900px; padding: 15px; margin: auto; }
   .btn { background: #1368ce; color: white; border: none; padding: 12px 22px; font-size: 17px; border-radius: 10px; cursor: pointer; font-weight: 700; margin: 0; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-family: 'Noto Sans Gujarati', sans-serif; will-change: transform; }
   .btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
@@ -44,8 +44,6 @@
   #creator-bar .star { color: #ffd700; margin: 0 8px; }
   @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
   @keyframes gradientMove { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
-
-  body { padding-top: 40px; }
 
   #conn-status { position: fixed; top: 42px; right: 10px; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; z-index: 9999; transition: 0.3s; }
   .conn-on { background: #26890c; color: white; }
@@ -240,12 +238,19 @@
   .player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: 800; color: #555; font-size: 15px; }
   .player-q-card { background: white; color: #111; padding: 18px 20px; border-radius: 14px; font-size: 18px; font-weight: 700; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: left; line-height: 1.45; border-left: 6px solid #46178f; font-family: 'Noto Sans Gujarati', sans-serif; }
 
-  .player-opt-btn { width: 100%; border: none; border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; font-size: 17px; font-weight: 800; color: white; display: flex; align-items: center; text-align: left; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.15s; font-family: 'Noto Sans Gujarati', sans-serif; }
+  /* ૨x૨ ગ્રીડ (Kahoot સ્ટાઇલ) */
+  .player-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .player-opt-btn { width: 100%; border: none; border-radius: 12px; padding: 16px 12px; min-height: 80px; font-size: 16px; font-weight: 800; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.15s; font-family: 'Noto Sans Gujarati', sans-serif; text-align: center; }
   .player-opt-btn:hover { filter: brightness(1.1); }
-  .player-opt-btn:active { transform: scale(0.97); }
+  .player-opt-btn:active { transform: scale(0.96); }
   .player-opt-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-  .shape-badge { font-size: 20px; margin-right: 14px; flex-shrink: 0; background: rgba(0,0,0,0.2); width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 900; }
-  .opt-text { flex-grow: 1; }
+  .shape-badge { font-size: 24px; margin-bottom: 6px; flex-shrink: 0; background: rgba(0,0,0,0.2); width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 900; }
+  .opt-text { flex-grow: 1; font-size: 15px; word-break: break-word; }
 
   .player-opt-btn.opt-a { background: linear-gradient(135deg, #e21b3c, #b81530); }
   .player-opt-btn.opt-b { background: linear-gradient(135deg, #1368ce, #0f4fa0); }
@@ -258,24 +263,18 @@
   .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ===== મોબાઈલ ===== */
   @media (max-width: 600px) {
     .podium-step { width: 30%; }
     .pin-box { font-size: 24px; padding: 10px 12px; letter-spacing: 2px; min-height: 50px; }
     h1 { font-size: 22px !important; }
     .p-name { font-size: 14px; }
-    .player-opt-btn { font-size: 16px; padding: 14px 16px; }
-    .player-q-card { font-size: 17px; padding: 16px; }
+    .player-opt-btn { font-size: 15px; min-height: 75px; padding: 10px; }
+    .player-q-card { font-size: 16px; padding: 14px; }
 
     .row-pair { gap: 8px; margin: 8px 0; }
     .row-pair > * { flex: 1 1 45%; min-height: 50px; }
-    .row-pair > .btn {
-      font-size: 13px; padding: 8px 8px;
-      white-space: normal; line-height: 1.2; word-break: break-word;
-    }
-    .row-pair > .pin-box {
-      font-size: 22px; padding: 8px 10px; letter-spacing: 1.5px;
-    }
+    .row-pair > .btn { font-size: 13px; padding: 8px 8px; white-space: normal; line-height: 1.2; word-break: break-word; }
+    .row-pair > .pin-box { font-size: 22px; padding: 8px 10px; letter-spacing: 1.5px; }
     .q-count-badge { font-size: 12px; padding: 8px 10px; white-space: normal; line-height: 1.2; }
     .btn-start-game { font-size: 14px !important; }
 
@@ -293,34 +292,6 @@
 
     .player-status-pill { font-size: 11px; padding: 5px 10px; }
     .live-status-container { max-height: 90px; gap: 5px; margin-top: 8px; }
-  }
-
-  /* ===== ટેબ્લેટ ===== */
-  @media (min-width: 601px) and (max-width: 1024px) {
-    #host-game .opt { font-size: 16px; min-height: 90px; }
-    #host-game .question-card { font-size: 20px; }
-    #host-game .timer-circle { width: 64px; height: 64px; }
-    #host-game .timer-circle svg { width: 64px; height: 64px; }
-    #host-game .timer-text { font-size: 20px; }
-  }
-
-  /* ===== સ્માર્ટ બોર્ડ / મોટી સ્ક્રીન ===== */
-  @media (min-width: 1025px) {
-    #host-game .opt { font-size: 18px; min-height: 100px; padding: 16px; }
-    #host-game .question-card { font-size: 22px; padding: 18px 22px; }
-    #host-game .q-header { font-size: 22px; }
-    #host-game .timer-circle { width: 72px; height: 72px; }
-    #host-game .timer-circle svg { width: 72px; height: 72px; }
-    #host-game .timer-text { font-size: 22px; }
-    #host-game .answer-counter { font-size: 18px; padding: 8px 24px; }
-    .player-status-pill { font-size: 15px; padding: 8px 16px; }
-    .live-status-container { max-height: 150px; }
-  }
-
-  @media (min-width: 601px) {
-    .row-pair > .btn { font-size: 17px; padding: 14px 20px; }
-    .q-count-badge { font-size: 16px; padding: 14px 22px; }
-    .btn-start-game { font-size: 19px !important; padding: 14px 24px !important; }
   }
 </style>
 </head>
@@ -473,7 +444,7 @@
       <span class="score-pill" style="margin:0; padding:4px 14px; font-size:14px;">સ્કોર: <span id="player-live-score">0</span></span>
     </div>
     <div class="player-q-card" id="player-q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
-    <div>
+    <div class="player-grid">
       <button type="button" class="player-opt-btn opt-a" data-key="1" onclick="sendPlayerAnswer('a')">
         <span class="shape-badge">▲</span><span class="opt-text" id="player-lbl-a">ઓપ્શન A</span>
       </button>
@@ -595,7 +566,6 @@ function openHostPanel() {
   document.getElementById('room-pin').innerText = currentPin;
 
   roomRef = db.ref('rooms/' + currentPin);
-
   const expiresAt = Date.now() + (3 * 60 * 60 * 1000);
 
   roomRef.set({
@@ -606,13 +576,7 @@ function openHostPanel() {
     expiresAt: expiresAt
   });
 
-  /*
-   * Room-specific questions.
-   * જૂના global saved_quiz_questions પરથી questions
-   * લોડ નહીં થાય.
-   */
   questions = [];
-
   const el = document.getElementById('q-loaded-count');
   el.innerText = `⚠ Excel અપલોડ કરો`;
   el.className = "q-count-badge loading";
@@ -620,7 +584,6 @@ function openHostPanel() {
   roomRef.child('players').on('value', snap => {
     const list = document.getElementById('lobby-players');
     list.innerHTML = "";
-
     snap.forEach(c => {
       const p = c.val();
       list.innerHTML += `<div class="player-badge">👤 ${sanitize(p.name)}</div>`;
@@ -628,9 +591,7 @@ function openHostPanel() {
   });
 
   if (hostPlayersRef) hostPlayersRef.off();
-
   hostPlayersRef = roomRef.child('players');
-
   hostPlayersRef.on('value', () => {
     renderLivePlayersStatus();
   });
@@ -663,76 +624,34 @@ function handleExcelUpload(e) {
   }
 
   const reader = new FileReader();
-
   reader.onload = evt => {
     try {
       const data = new Uint8Array(evt.target.result);
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
-
       const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
 
       let parsed = [];
-
       json.forEach(row => {
         const keys = Object.keys(row);
-
         const get = t => {
-          const k = keys.find(k =>
-            k.toString().trim().toLowerCase().includes(t.toLowerCase())
-          );
-
-          return k && row[k]
-            ? row[k].toString().trim()
-            : "";
+          const k = keys.find(k => k.toString().trim().toLowerCase().includes(t.toLowerCase()));
+          return k && row[k] ? row[k].toString().trim() : "";
         };
 
         const q = get("question") || get("પ્રશ્ન");
+        const a = row['a'] || row['A'] || get("optiona") || "";
+        const b = row['b'] || row['B'] || get("optionb") || "";
+        const c = row['c'] || row['C'] || get("optionc") || "";
+        const d = row['d'] || row['D'] || get("optiond") || "";
 
-        const a =
-          row['a'] ||
-          row['A'] ||
-          get("optiona") ||
-          "";
-
-        const b =
-          row['b'] ||
-          row['B'] ||
-          get("optionb") ||
-          "";
-
-        const c =
-          row['c'] ||
-          row['C'] ||
-          get("optionc") ||
-          "";
-
-        const d =
-          row['d'] ||
-          row['D'] ||
-          get("optiond") ||
-          "";
-
-        let corr =
-          (get("correct") ||
-           get("સાચો") ||
-           "")
-          .toLowerCase()
-          .trim();
-
+        let corr = (get("correct") || get("સાચો") || "").toLowerCase().trim();
         if (corr === "1") corr = "a";
         if (corr === "2") corr = "b";
         if (corr === "3") corr = "c";
         if (corr === "4") corr = "d";
 
-        if (
-          q &&
-          a &&
-          b &&
-          c &&
-          d &&
-          ['a', 'b', 'c', 'd'].includes(corr)
-        ) {
+        if (q && a && b && c && d && ['a', 'b', 'c', 'd'].includes(corr)) {
           parsed.push({
             q: sanitize(q, 500),
             a: sanitize(a, 300),
@@ -745,19 +664,9 @@ function handleExcelUpload(e) {
       });
 
       const el = document.getElementById('q-loaded-count');
-
       if (parsed.length > 0) {
-
-        /*
-         * Room-specific questions.
-         *
-         * Correct answer serverQuizમાં રહેશે.
-         * Player તેને વાંચી શકશે નહીં.
-         */
         questions = parsed;
-
         const questionUpdates = {};
-
         parsed.forEach((question, index) => {
           questionUpdates[index] = {
             q: question.q,
@@ -772,54 +681,28 @@ function handleExcelUpload(e) {
         db.ref('serverQuiz/' + currentPin + '/questions')
           .set(questionUpdates)
           .then(() => {
-
             el.innerText = `✅ ${parsed.length} પ્રશ્નો લોડ`;
             el.className = "q-count-badge success";
-
-            showToast(
-              `✅ ${parsed.length} પ્રશ્નો આ Roomમાં સુરક્ષિત રીતે લોડ થયા!`,
-              'success'
-            );
-
+            showToast(`✅ ${parsed.length} પ્રશ્નો આ Roomમાં સુરક્ષિત રીતે લોડ થયા!`, 'success');
           })
           .catch(err => {
-
             console.error("Question upload error:", err);
-
             el.innerText = `❌ અપલોડ નિષ્ફળ`;
             el.className = "q-count-badge error";
-
-            showToast(
-              "પ્રશ્નો server પર save થઈ શક્યા નથી: " + err.message,
-              'error'
-            );
+            showToast("પ્રશ્નો server પર save થઈ શક્યા નથી: " + err.message, 'error');
           });
-
       } else {
-
         el.innerText = `❌ ફાઈલ ખોટી`;
         el.className = "q-count-badge error";
-
-        showToast(
-          "⚠ ફાઈલમાં યોગ્ય ડેટા મળ્યો નથી",
-          'error'
-        );
+        showToast("⚠ ફાઈલમાં યોગ્ય ડેટા મળ્યો નથી", 'error');
       }
-
     } catch (err) {
-
       const el = document.getElementById('q-loaded-count');
-
       el.innerText = `❌ ફાઈલ ખોટી`;
       el.className = "q-count-badge error";
-
-      showToast(
-        "ફાઈલ ભૂલ: " + err.message,
-        'error'
-      );
+      showToast("ફાઈલ ભૂલ: " + err.message, 'error');
     }
   };
-
   reader.readAsArrayBuffer(file);
 }
 
@@ -840,6 +723,7 @@ function adminStartGameCommand() {
     }
   }, 2000);
 }
+
 function loadHostQuestion(idx) {
   if (!currentPin || !questions || !questions[idx]) {
     alert("આ પ્રશ્ન ઉપલબ્ધ નથી.");
@@ -876,7 +760,61 @@ function loadHostQuestion(idx) {
     });
 }
 
+function renderHostQuestion(q, idx) {
+  document.getElementById('q-counter').innerText = `પ્રશ્ન ${idx + 1} / ${questions.length}`;
+  document.getElementById('q-text').innerText = q.q;
+  document.getElementById('lbl-a').innerText = `▲ ${q.a}`;
+  document.getElementById('lbl-b').innerText = `◆ ${q.b}`;
+  document.getElementById('lbl-c').innerText = `● ${q.c}`;
+  document.getElementById('lbl-d').innerText = `■ ${q.d}`;
+  document.getElementById('answer-counter').innerText = `📊 જવાબ: 0`;
 
+  const progressPercent = ((idx + 1) / questions.length) * 100;
+  document.getElementById('q-progress-bar').style.width = `${progressPercent}%`;
+
+  document.querySelectorAll('.opt').forEach(el => el.classList.remove('correct-highlight'));
+}
+
+function startHostTimer(seconds) {
+  clearInterval(timerInterval);
+  let timeLeft = seconds;
+  const timerCircleFg = document.getElementById('timer-circle-fg');
+  const timerVal = document.getElementById('timer-val');
+  const circumference = 2 * Math.PI * 24;
+
+  timerVal.innerText = timeLeft;
+  timerCircleFg.style.strokeDasharray = circumference;
+  timerCircleFg.style.strokeDashoffset = 0;
+  timerCircleFg.style.stroke = '#ffeb3b';
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerVal.innerText = timeLeft;
+
+    const offset = circumference - (timeLeft / seconds) * circumference;
+    timerCircleFg.style.strokeDashoffset = offset;
+
+    if (timeLeft <= 5) {
+      timerCircleFg.style.stroke = '#e74c3c';
+      playTickSound();
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timeUpHost();
+    }
+  }, 1000);
+}
+
+function listenHostAnswers(idx) {
+  if (hostAnswersRef) hostAnswersRef.off();
+  hostAnswersRef = roomRef.child('answers/' + idx);
+  hostAnswersRef.on('value', snap => {
+    currentAnswerCount = snap.numChildren();
+    document.getElementById('answer-counter').innerText = `📊 જવાબ: ${currentAnswerCount}`;
+    renderLivePlayersStatus();
+  });
+}
 
 async function timeUpHost() {
   clearInterval(timerInterval);
@@ -888,64 +826,63 @@ async function timeUpHost() {
   renderLivePlayersStatus();
 }
 
-async function calculateAndBroadcastScores() {
+/* ===== વાસ્તવિક પોઈન્ટ્સ અને સ્કોરિંગ ગણતરી ===== */
+async function calculateAndBroadcastScores(qIdx) {
   if (!currentPin) return;
 
-  const roomRef = db.ref(`rooms/${currentPin}`);
-
   try {
-    const snap = await roomRef.once("value");
-    const room = snap.val();
+    const q = questions[qIdx];
+    if (!q) return;
 
-    if (!room) return;
+    const correctAns = (q.correct || "").toLowerCase().trim();
 
-    const qIdx = Number(room.currentQuestion);
+    const [answersSnap, playersSnap] = await Promise.all([
+      roomRef.child(`answers/${qIdx}`).once('value'),
+      roomRef.child('players').once('value')
+    ]);
 
-    if (!Number.isInteger(qIdx) || qIdx < 0) {
-      console.warn("Invalid question index:", qIdx);
-      return;
-    }
+    const answers = answersSnap.val() || {};
+    const players = playersSnap.val() || {};
+    const updates = {};
 
-    /*
-     * મહત્વપૂર્ણ:
-     * અહીં હવે કોઈ player નો score ગણવામાં આવતો નથી.
-     *
-     * Score Cloud Function દ્વારા:
-     * Answer → Validation → Timeout → Correct Answer
-     * → Atomic Transaction → Score
-     * કરવામાં આવશે.
-     */
+    const roomStateSnap = await roomRef.child('questionStartTime').once('value');
+    const qStartTime = Number(roomStateSnap.val()) || Date.now();
 
-    await roomRef.update({
-      state: "review",
+    Object.keys(players).forEach(pId => {
+      const pData = players[pId] || {};
+      let curScore = Number(pData.score) || 0;
+      let curStreak = Number(pData.streak) || 0;
 
-      /*
-       * પ્રશ્ન ક્યારે બંધ થયો તેનો Firebase server timestamp.
-       * Cloud Function આ timestampનો ઉપયોગ કરશે જેથી
-       * પ્રશ્ન બંધ થયા પછી આવેલ જવાબ reject થઈ શકે.
-       */
-      [`questionClosedAt/${qIdx}`]:
-        firebase.database.ServerValue.TIMESTAMP,
+      const pAnsData = answers[pId];
 
-      /*
-       * Correct answer માત્ર review સમયે host UI માટે.
-       * ServerQuizમાંથી મેળવવામાં આવશે.
-       */
-      revealAt:
-        firebase.database.ServerValue.TIMESTAMP
+      if (pAnsData && pAnsData.ans && pAnsData.ans.toLowerCase() === correctAns) {
+        const timeTakenSec = Math.max(0, ((pAnsData.time || Date.now()) - qStartTime) / 1000);
+        const timeRatio = Math.min(1, Math.max(0, timeTakenSec / CONFIG.QUESTION_TIME));
+
+        let earned = Math.round(CONFIG.MAX_POINTS * (1 - (timeRatio * 0.5)));
+        curStreak += 1;
+        if (curStreak >= 2) {
+          earned += (CONFIG.STREAK_BONUS * (curStreak - 1));
+        }
+
+        curScore += earned;
+      } else {
+        curStreak = 0;
+      }
+
+      updates[`players/${pId}/score`] = curScore;
+      updates[`players/${pId}/streak`] = curStreak;
     });
 
-    console.log(
-      "Question closed. Server will finalize scores:",
-      currentPin,
-      qIdx
-    );
+    updates['state'] = "review";
+    updates[`questionClosedAt/${qIdx}`] = firebase.database.ServerValue.TIMESTAMP;
+    updates['revealAt'] = firebase.database.ServerValue.TIMESTAMP;
+    updates['correctAnswer'] = correctAns;
 
+    await roomRef.update(updates);
+    console.log(`Question ${qIdx} scores updated!`);
   } catch (error) {
-    console.error(
-      "Question close error:",
-      error
-    );
+    console.error("Score calculation error:", error);
   }
 }
 
@@ -973,11 +910,11 @@ async function renderLivePlayersStatus() {
     }
 
     sortedPlayers.forEach(p => {
-      const hasAnswered = answers[p.id] !== undefined;
+      const hasAns = answers[p.id] !== undefined;
       let cls = "player-status-pill";
       let icon = "⏸️";
 
-      if (hasAnswered) {
+      if (hasAns) {
         if (currentState === 'reveal' || currentState === 'review') {
           const correctAns = (questions[currentQIdx] && questions[currentQIdx].correct) || "";
           const isCorrect = answers[p.id].ans === correctAns;
@@ -1045,10 +982,8 @@ function adminPrevQuestion() {
   if (hostAnswersRef) hostAnswersRef.off();
 
   currentQIdx = currentQIdx - 1;
-
   document.getElementById('host-leaderboard').style.display = 'none';
   document.getElementById('host-game').style.display = 'block';
-
   loadHostQuestionReview(currentQIdx);
 }
 
@@ -1056,8 +991,7 @@ function loadHostQuestionReview(idx) {
   currentQIdx = idx;
   const q = questions[idx];
 
-  document.getElementById('q-counter').innerText =
-    `પ્રશ્ન ${idx + 1} / ${questions.length} (રિવ્યુ)`;
+  document.getElementById('q-counter').innerText = `પ્રશ્ન ${idx + 1} / ${questions.length} (રિવ્યુ)`;
   document.getElementById('q-text').innerText = q.q;
   document.getElementById('lbl-a').innerText = `▲ ${q.a}`;
   document.getElementById('lbl-b').innerText = `◆ ${q.b}`;
@@ -1083,7 +1017,6 @@ function loadHostQuestionReview(idx) {
 
   document.getElementById('answer-counter').innerText = `🔍 રિવ્યુ મોડ`;
   renderLivePlayersStatus();
-
   showToast("📖 રિવ્યુ મોડ — પ્લેયર્સ ફક્ત જોઈ શકશે", 'info');
 }
 
@@ -1115,14 +1048,6 @@ function showFinalPodium() {
   document.getElementById('host-podium').style.display = 'block';
 
   playWinSound();
-
-  try {
-    const winAudio = document.getElementById('sound-win');
-    winAudio.currentTime = 0;
-    winAudio.volume = 0.6;
-    winAudio.play().catch(()=>{});
-  } catch(e) {}
-
   roomRef.update({ state: "ended" });
 
   const duration = 5000;
@@ -1156,10 +1081,11 @@ let playerRoomRef = null;
 let currentScore = 0;
 let currentStreak = 0;
 let hasAnswered = false;
+let playerAnswered = false;
 let qStartTime = 0;
 let lastProcessedQ = -1;
 let answerSubmitLock = false;
-let playerQVersion = 0;  // ✅ બગ ફિક્સ માટે
+let playerQVersion = 0;
 
 function initPlayer() {
   document.getElementById('role-select-view').style.display = 'none';
@@ -1197,6 +1123,7 @@ function joinPlayerRoom() {
   btn.disabled = true;
 
   playerRoomRef = db.ref('rooms/' + pin);
+  currentPin = pin;
 
   playerRoomRef.once('value').then(snap => {
     if (!snap.exists()) {
@@ -1207,6 +1134,8 @@ function joinPlayerRoom() {
 
     playerRoomRef.child('players/' + playerId).update({
       name: name,
+      score: 0,
+      streak: 0,
       joinedAt: Date.now()
     }).then(() => {
       document.getElementById('player-login-box').style.display = 'none';
@@ -1243,8 +1172,9 @@ function listenPlayerGame() {
       const qIdx = Number(val.currentQuestion);
       if (qIdx !== lastProcessedQ) {
         lastProcessedQ = qIdx;
-        playerQVersion++;  // ✅ નવો પ્રશ્ન — version વધારો
+        playerQVersion++;
         hasAnswered = false;
+        playerAnswered = false;
         answerSubmitLock = false;
         qStartTime = Number(val.questionStartTime) || Date.now();
 
@@ -1270,24 +1200,31 @@ function listenPlayerGame() {
     }
     else if (val.state === "review") {
       const qIdx = Number(val.currentQuestion);
-      document.getElementById('player-q-num').innerText = `પ્રશ્ન ${qIdx + 1} (રિવ્યુ)`;
-      document.getElementById('player-q-text').innerText = val.questionText || "";
+      const correctKey = (val.correctAnswer || "").toLowerCase();
 
-      if (val.options) {
-        document.getElementById('player-lbl-a').innerText = val.options.a || "";
-        document.getElementById('player-lbl-b').innerText = val.options.b || "";
-        document.getElementById('player-lbl-c').innerText = val.options.c || "";
-        document.getElementById('player-lbl-d').innerText = val.options.d || "";
-      }
+      // પ્લેયરનો જવાબ ચકાસી સાઉન્ડ અને ફીડબેક બતાવો
+      const myAnsRef = db.ref(`rooms/${currentPin}/answers/${qIdx}/${playerId}`);
+      myAnsRef.once('value').then(ansSnap => {
+        const myAns = ansSnap.val() ? ansSnap.val().ans : null;
+        const feedbackBox = document.getElementById('feedback-container');
+
+        if (myAns === correctKey) {
+          try { document.getElementById('sound-correct').play().catch(()=>{}); } catch(e){}
+          confetti({ particleCount: 50, spread: 60 });
+          feedbackBox.innerHTML = `<div class="feedback-box" style="background:#26890c; color:white;">🎉 સાચો જવાબ! ખૂબ સરસ!</div>`;
+        } else if (myAns) {
+          try { document.getElementById('sound-wrong').play().catch(()=>{}); } catch(e){}
+          feedbackBox.innerHTML = `<div class="feedback-box" style="background:#e21b3c; color:white;">❌ ખોટો જવાબ! સાચો જવાબ 🟡 બોર્ડરમાં છે.</div>`;
+        } else {
+          feedbackBox.innerHTML = `<div class="feedback-box" style="background:#607d8b; color:white;">⏰ સમય પૂરો! તમે જવાબ આપ્યો ન હતો.</div>`;
+        }
+      });
 
       document.querySelectorAll('.player-opt-btn').forEach(btn => {
         btn.disabled = true;
-        btn.style.opacity = '0.5';
-        btn.style.outline = 'none';
-        btn.style.transform = 'none';
+        btn.style.opacity = '0.4';
       });
 
-      const correctKey = (val.correctAnswer || "").toLowerCase();
       const keyMap = { 'a': '1', 'b': '2', 'c': '3', 'd': '4' };
       const correctBtn = document.querySelector(`.player-opt-btn[data-key="${keyMap[correctKey]}"]`);
       if (correctBtn) {
@@ -1296,27 +1233,12 @@ function listenPlayerGame() {
         correctBtn.style.transform = 'scale(1.03)';
       }
 
-      document.getElementById('player-wait-box').style.display = 'none';
-      document.getElementById('player-question-container').style.display = 'block';
-      document.getElementById('feedback-container').innerHTML =
-        `<div class="feedback-box" style="background:#607d8b;">📖 રિવ્યુ — સાચો જવાબ 🟡 પીળા બોર્ડરમાં છે</div>`;
-    }
-    else if (val.state === "reveal") {
-      if (!hasAnswered) {
-        showPlayerFeedback(false, "⏰ સમય પૂરો! જવાબ આપ્યો નથી.");
-      }
-      const revealVersion = playerQVersion;
-      setTimeout(() => {
-        if (playerQVersion !== revealVersion) return;  // ✅ નવો પ્રશ્ન આવ્યો — છુપાવવું નહીં
-        document.getElementById('player-question-container').style.display = 'none';
-        document.getElementById('player-wait-box').style.display = 'block';
-        document.getElementById('wait-msg').innerText = "આગળના પ્રશ્નની રાહ જુઓ...";
-      }, 1500);
+      document.getElementById('player-wait-box').style.display = 'block';
     }
     else if (val.state === "ended") {
       document.getElementById('player-question-container').style.display = 'none';
       document.getElementById('player-wait-box').style.display = 'block';
-      document.getElementById('wait-msg').innerText = "🎉 ક્વિઝ પૂર્ણ! વિજેતાઓ જુઓ.";
+      document.getElementById('wait-msg').innerText = "🎉 ક્વિઝ પૂર્ણ! પરિણામ સ્ક્રીન પર જુઓ.";
     }
     else if (val.state === "lobby") {
       document.getElementById('player-wait-box').style.display = 'block';
@@ -1324,41 +1246,20 @@ function listenPlayerGame() {
   });
 }
 
-
 function sendPlayerAnswer(selected) {
   if (!currentPin || !playerId) return;
-
-  // એક જ પ્રશ્નનો જવાબ બીજી વખત મોકલવો નહીં
   if (playerAnswered) return;
 
-  // માત્ર a/b/c/d જ માન્ય
   selected = String(selected || "").toLowerCase().trim();
-
-  if (!/^[abcd]$/.test(selected)) {
-    console.warn("Invalid answer:", selected);
-    return;
-  }
+  if (!/^[abcd]$/.test(selected)) return;
 
   const qIdx = Number(lastProcessedQ);
+  if (!Number.isInteger(qIdx) || qIdx < 0) return;
 
-  if (!Number.isInteger(qIdx) || qIdx < 0) {
-    console.warn("Invalid question index:", qIdx);
-    return;
-  }
-
-  const answerRef = db.ref(
-    `rooms/${currentPin}/answers/${qIdx}/${playerId}`
-  );
-
+  const answerRef = db.ref(`rooms/${currentPin}/answers/${qIdx}/${playerId}`);
   playerAnswered = true;
+  hasAnswered = true;
 
-  /*
-   * મહત્વપૂર્ણ:
-   * Date.now() ના બદલે Firebase ServerValue.TIMESTAMP.
-   *
-   * તેથી answer time server દ્વારા નક્કી થશે.
-   * Client પોતાની clock બદલીને extra time મેળવી શકશે નહીં.
-   */
   const answerData = {
     ans: selected,
     time: firebase.database.ServerValue.TIMESTAMP
@@ -1366,35 +1267,49 @@ function sendPlayerAnswer(selected) {
 
   answerRef.set(answerData)
     .then(() => {
-
-      console.log(
-        "Answer submitted:",
-        currentPin,
-        qIdx,
-        selected
-      );
-
       showPlayerFeedback(selected);
-
     })
     .catch((error) => {
-
-      console.error(
-        "Answer submission error:",
-        error
-      );
-
-      /*
-       * જો Firebase Rules અથવા networkને કારણે answer
-       * save ન થાય તો player ફરી પ્રયાસ કરી શકે.
-       */
+      console.error("Answer submission error:", error);
       playerAnswered = false;
-
+      hasAnswered = false;
       alert("જવાબ મોકલવામાં સમસ્યા આવી. ફરી પ્રયાસ કરો.");
     });
 }
 
-/* ===== ✅ વિનર સાઉન્ડ (Web Audio API) ===== */
+function showPlayerFeedback(selected) {
+  document.querySelectorAll('.player-opt-btn').forEach(btn => {
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
+  });
+
+  const keyMap = { 'a': '1', 'b': '2', 'c': '3', 'd': '4' };
+  const selBtn = document.querySelector(`.player-opt-btn[data-key="${keyMap[selected]}"]`);
+  if (selBtn) {
+    selBtn.style.opacity = '1';
+    selBtn.style.outline = '4px solid white';
+    selBtn.style.transform = 'scale(1.02)';
+  }
+
+  showToast("✅ જવાબ જમા થયો! પરિણામની રાહ જુઓ...", "success");
+}
+
+function playTickSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 800;
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.08);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.08);
+  } catch(e) {}
+}
+
 function playWinSound() {
   try {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1431,7 +1346,6 @@ function playWinSound() {
   }
 }
 
-/* ===== ✅ Audio Unlock ===== */
 let audioUnlocked = false;
 function unlockAudio() {
   if (audioUnlocked) return;
@@ -1447,11 +1361,9 @@ function unlockAudio() {
     osc.start();
     osc.stop(ctx.currentTime + 0.01);
     audioUnlocked = true;
-    console.log("Audio unlocked");
   } catch(e) {}
 }
 
-// ડોક્યુમેન્ટ ક્લિક પર Audio unlock
 document.addEventListener('click', unlockAudio, { once: true });
 </script>
 </body>
