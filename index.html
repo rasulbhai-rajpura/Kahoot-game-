@@ -444,21 +444,28 @@
       <span class="score-pill" style="margin:0; padding:4px 14px; font-size:14px;">સ્કોર: <span id="player-live-score">0</span></span>
     </div>
     <div class="player-q-card" id="player-q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
-    <div class="player-grid">
-      <button type="button" class="player-opt-btn opt-a" data-key="1" onclick="sendPlayerAnswer('a')">
-        <span class="shape-badge">▲</span><span class="opt-text" id="player-lbl-a">ઓપ્શન A</span>
+      <div id="player-question-container" style="width: 95%; max-width: 950px; margin: 10px auto;">
+    <div class="player-header">
+      <span id="player-q-num">પ્રશ્ન ૧</span>
+      <span class="score-pill" style="margin:0; padding:4px 14px; font-size:14px;">સ્કોર: <span id="player-live-score">0</span></span>
+    </div>
+    <div class="player-q-card" id="player-q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
+    <div class="player-grid" style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 14px !important; width: 100%;">
+      <button type="button" class="player-opt-btn opt-a" data-key="1" onclick="sendPlayerAnswer('a')" style="display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 14px 18px; min-height: 80px; width: 100%;">
+        <span class="shape-badge" style="margin-right: 12px; margin-bottom: 0;">▲</span><span class="opt-text" id="player-lbl-a">ઓપ્શન A</span>
       </button>
-      <button type="button" class="player-opt-btn opt-b" data-key="2" onclick="sendPlayerAnswer('b')">
-        <span class="shape-badge">◆</span><span class="opt-text" id="player-lbl-b">ઓપ્શન B</span>
+      <button type="button" class="player-opt-btn opt-b" data-key="2" onclick="sendPlayerAnswer('b')" style="display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 14px 18px; min-height: 80px; width: 100%;">
+        <span class="shape-badge" style="margin-right: 12px; margin-bottom: 0;">◆</span><span class="opt-text" id="player-lbl-b">ઓપ્શન B</span>
       </button>
-      <button type="button" class="player-opt-btn opt-c" data-key="3" onclick="sendPlayerAnswer('c')">
-        <span class="shape-badge">●</span><span class="opt-text" id="player-lbl-c">ઓપ્શન C</span>
+      <button type="button" class="player-opt-btn opt-c" data-key="3" onclick="sendPlayerAnswer('c')" style="display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 14px 18px; min-height: 80px; width: 100%;">
+        <span class="shape-badge" style="margin-right: 12px; margin-bottom: 0;">●</span><span class="opt-text" id="player-lbl-c">ઓપ્શન C</span>
       </button>
-      <button type="button" class="player-opt-btn opt-d" data-key="4" onclick="sendPlayerAnswer('d')">
-        <span class="shape-badge">■</span><span class="opt-text" id="player-lbl-d">ઓપ્શન D</span>
+      <button type="button" class="player-opt-btn opt-d" data-key="4" onclick="sendPlayerAnswer('d')" style="display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 14px 18px; min-height: 80px; width: 100%;">
+        <span class="shape-badge" style="margin-right: 12px; margin-bottom: 0;">■</span><span class="opt-text" id="player-lbl-d">ઓપ્શન D</span>
       </button>
     </div>
   </div>
+</div>
 </div>
 
 <script>
