@@ -438,36 +438,35 @@
     <span id="my-streak-badge"></span>
   </div>
 
-  <div id="player-question-container">
+  <div id="player-question-container" style="width: 95%; max-width: 850px; margin: 10px auto;">
     <div class="player-header">
       <span id="player-q-num">પ્રશ્ન ૧</span>
       <span class="score-pill" style="margin:0; padding:4px 14px; font-size:14px;">સ્કોર: <span id="player-live-score">0</span></span>
     </div>
     <div class="player-q-card" id="player-q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
-      <div id="player-question-container" style="width: 95%; max-width: 950px; margin: 10px auto;">
-    <div class="player-header">
-      <span id="player-q-num">પ્રશ્ન ૧</span>
-      <span class="score-pill" style="margin:0; padding:4px 14px; font-size:14px;">સ્કોર: <span id="player-live-score">0</span></span>
-    </div>
-    <div class="player-q-card" id="player-q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
+    
     <div class="player-grid" style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 14px !important; width: 100%;">
-      <button type="button" class="player-opt-btn opt-a" data-key="1" onclick="sendPlayerAnswer('a')" style="display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 14px 18px; min-height: 80px; width: 100%;">
-        <span class="shape-badge" style="margin-right: 12px; margin-bottom: 0;">▲</span><span class="opt-text" id="player-lbl-a">ઓપ્શન A</span>
+      <button type="button" class="player-opt-btn opt-a" data-key="1" onclick="sendPlayerAnswer('a')" style="background: linear-gradient(135deg, #e21b3c, #b81530); min-height: 80px; width: 100%; border: none; border-radius: 12px; padding: 12px 16px; color: white; display: flex; align-items: center; justify-content: flex-start; gap: 12px; cursor: pointer;">
+        <span class="shape-badge" style="font-size: 22px; background: rgba(0,0,0,0.25); width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0;">▲</span>
+        <span class="opt-text" id="player-lbl-a" style="font-size: 16px; font-weight: 700; text-align: left; line-height: 1.2;">ઓપ્શન A</span>
       </button>
-      <button type="button" class="player-opt-btn opt-b" data-key="2" onclick="sendPlayerAnswer('b')" style="display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 14px 18px; min-height: 80px; width: 100%;">
-        <span class="shape-badge" style="margin-right: 12px; margin-bottom: 0;">◆</span><span class="opt-text" id="player-lbl-b">ઓપ્શન B</span>
+
+      <button type="button" class="player-opt-btn opt-b" data-key="2" onclick="sendPlayerAnswer('b')" style="background: linear-gradient(135deg, #1368ce, #0f4fa0); min-height: 80px; width: 100%; border: none; border-radius: 12px; padding: 12px 16px; color: white; display: flex; align-items: center; justify-content: flex-start; gap: 12px; cursor: pointer;">
+        <span class="shape-badge" style="font-size: 22px; background: rgba(0,0,0,0.25); width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0;">◆</span>
+        <span class="opt-text" id="player-lbl-b" style="font-size: 16px; font-weight: 700; text-align: left; line-height: 1.2;">ઓપ્શન B</span>
       </button>
-      <button type="button" class="player-opt-btn opt-c" data-key="3" onclick="sendPlayerAnswer('c')" style="display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 14px 18px; min-height: 80px; width: 100%;">
-        <span class="shape-badge" style="margin-right: 12px; margin-bottom: 0;">●</span><span class="opt-text" id="player-lbl-c">ઓપ્શન C</span>
+
+      <button type="button" class="player-opt-btn opt-c" data-key="3" onclick="sendPlayerAnswer('c')" style="background: linear-gradient(135deg, #d89e00, #b88600); min-height: 80px; width: 100%; border: none; border-radius: 12px; padding: 12px 16px; color: white; display: flex; align-items: center; justify-content: flex-start; gap: 12px; cursor: pointer;">
+        <span class="shape-badge" style="font-size: 22px; background: rgba(0,0,0,0.25); width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0;">●</span>
+        <span class="opt-text" id="player-lbl-c" style="font-size: 16px; font-weight: 700; text-align: left; line-height: 1.2;">ઓપ્શન C</span>
       </button>
-      <button type="button" class="player-opt-btn opt-d" data-key="4" onclick="sendPlayerAnswer('d')" style="display: flex; align-items: center; justify-content: flex-start; text-align: left; padding: 14px 18px; min-height: 80px; width: 100%;">
-        <span class="shape-badge" style="margin-right: 12px; margin-bottom: 0;">■</span><span class="opt-text" id="player-lbl-d">ઓપ્શન D</span>
+
+      <button type="button" class="player-opt-btn opt-d" data-key="4" onclick="sendPlayerAnswer('d')" style="background: linear-gradient(135deg, #26890c, #1e6b09); min-height: 80px; width: 100%; border: none; border-radius: 12px; padding: 12px 16px; color: white; display: flex; align-items: center; justify-content: flex-start; gap: 12px; cursor: pointer;">
+        <span class="shape-badge" style="font-size: 22px; background: rgba(0,0,0,0.25); width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0;">■</span>
+        <span class="opt-text" id="player-lbl-d" style="font-size: 16px; font-weight: 700; text-align: left; line-height: 1.2;">ઓપ્શન D</span>
       </button>
     </div>
   </div>
-</div>
-</div>
-
 <script>
 const CONFIG = {
   ADMIN_PASSWORD_HASH: "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
