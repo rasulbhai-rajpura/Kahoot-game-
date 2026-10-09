@@ -737,7 +737,8 @@ function loadHostQuestion(idx) {
     state: "question",
     currentQuestion: idx,
     questionText: q.q,
-    options: {
+       q: q.q,
+   options: {
       a: q.a,
       b: q.b,
       c: q.c,
@@ -1186,7 +1187,9 @@ function listenPlayerGame() {
         });
 
         document.getElementById('player-q-num').innerText = `પ્રશ્ન ${qIdx + 1}`;
-        document.getElementById('player-q-text').innerText = val.questionText || "...";
+        const qText = val.questionText || val.q || "";
+document.getElementById('player-q-text').innerText = qText || "પ્રશ્ન લોડ થઈ રહ્યો છે...";
+
         if (val.options) {
           document.getElementById('player-lbl-a').innerText = val.options.a || "";
           document.getElementById('player-lbl-b').innerText = val.options.b || "";
